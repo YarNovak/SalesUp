@@ -1,0 +1,29 @@
+
+
+
+ if(vapecompony.getEntitiesJson()!=null){
+            try {
+                ObjectMapper mapper2 = new ObjectMapper();
+                List<MessageEntity> entities = mapper2.readValue(
+                        vapecompony.getEntitiesJson(),
+                        new TypeReference<List<MessageEntity>>() {}
+                );
+                sendMessage.setEntities(entities);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
+
+        buttonText.getTexts().get("cart"))
+        messagesInf.getMessageText("greeting");
+
+
+
+         ByteArrayInputStream bais = new ByteArrayInputStream(messagesinf.getMy_messages().get(key).getPhoto());
+                        InputFile inputFile = new InputFile(bais, "image.jpg");
+                        sendPhoto.setPhoto(inputFile);
+
+
