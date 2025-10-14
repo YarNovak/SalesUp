@@ -1,4 +1,4 @@
-### 🤖 [SalesUp](https://github.com/yaroslav-novak/SalesUp)
+### 🤖 [SalesUp]([https://github.com/yaroslav-novak/SalesUp](https://t.me/TelSalesBot_bot))
 > **SalesUp — A Java-powered SaaS platform that lets anyone build, customize, and deploy Telegram sales bots with no code.**
 
 **SalesUp** is a next-generation **SaaS platform** written in **Java + Spring Boot**, designed to help businesses and individuals **create, configure, and manage their own Telegram sales bots** — entirely through chat.
