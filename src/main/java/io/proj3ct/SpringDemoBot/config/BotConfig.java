@@ -8,8 +8,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@Data
+
 @PropertySource("application.properties")
+@Data
 public class BotConfig {
 
     Integer count = 0;

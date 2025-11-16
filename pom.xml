@@ -16,9 +16,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>SpringDemoBot</name>
 	<description>Demo project for Spring Boot</description>
-
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version> <!-- міняємо на стабільну версію для Spring Boot 2.7.x -->
 		<telegram.version>5.6.0</telegram.version>
 	</properties>
 
@@ -63,7 +62,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.32</version> <!-- стабільна версія для JDK 17+ -->
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -90,7 +90,7 @@
 			<version>2.2.0</version>
 		</dependency>
 
-		<!-- JSON (якщо треба явно) -->
+		<!-- JSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
@@ -125,5 +125,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
