@@ -1,4 +1,4 @@
-package io.proj3ct.SpringDemoBot.multitenant;
+package io.proj3ct.SpringDemoBot;
 
 /**
  * Простая Java-запись (record) для хранения данных о нашем тенанте (боте).
@@ -7,6 +7,8 @@ package io.proj3ct.SpringDemoBot.multitenant;
  * @param botToken      Секретный токен бота от BotFather
  * @param botName       Просто имя для логов
  */
+
+
 public record TenantConfig(
         String botIdentifier,
         String botToken,

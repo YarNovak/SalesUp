@@ -6,10 +6,12 @@ import io.proj3ct.SpringDemoBot.DB_entities.Bot;
 import io.proj3ct.SpringDemoBot.DaO.*;
 import io.proj3ct.SpringDemoBot.Dispetchers.CallbackDispatcher;
 import io.proj3ct.SpringDemoBot.Dispetchers.CommandDispatcher;
+import io.proj3ct.SpringDemoBot.AsyncConfig;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.model.*;
 import io.proj3ct.SpringDemoBot.model.User;
+import io.proj3ct.SpringDemoBot.TelegramWebhookController;
 import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,7 +162,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     private CacheDev cacheDev;
-
 
     public TelegramBot(BotConfig config) {
         this.config = config;

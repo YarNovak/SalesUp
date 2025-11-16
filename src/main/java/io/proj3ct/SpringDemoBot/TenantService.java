@@ -1,6 +1,5 @@
-package io.proj3ct.SpringDemoBot.multitenant;
+package io.proj3ct.SpringDemoBot;
 
-import io.proj3ct.SpringDemoBot.multitenant.TenantService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,6 +29,24 @@ public class TenantService {
     @PostConstruct
     public void initTenants() {
         log.warn("--- ИНИЦИАЛИЗАЦИЯ ТЕСТОВЫХ ТЕНАНТОВ ---");
+
+        // --- ⚠️⚠️⚠️ ВАШ БОТ №1 ⚠️⚠️⚠️ ---
+        // 1. Замените "uuid-bot-1" на UUID (например, с https://www.uuidgenerator.net/)
+        // 2. Замените "ТОКЕН_БОТА_1" на реальный токен
+        addTenant(new TenantConfig(
+                "13402b03-e2e9-4085-a4e7-b00689210d43", // ⬅️ ЗАМЕНИТЬ!
+                "7459388858:AAGB_x6dDrWR56csaRpvN5sUHbcDxhfXs6M", // ⬅️ ЗАМЕНИТЬ!
+                "Бот-Теста-Один"
+        ));
+
+        // --- ⚠️⚠️⚠️ ВАШ БОТ №2 ⚠️⚠️⚠️ ---
+        // 1. Замените "uuid-bot-2" на ВТОРОЙ, ДРУГОЙ UUID
+        // 2. Замените "ТОКЕН_БОТА_2" на реальный токен от ВТОРОГО бота
+        addTenant(new TenantConfig(
+                "3a6d264c-13bc-4a6d-9344-e89fc2bc9fb6", // ⬅️ ЗАМЕНИТЬ!
+                "6728124954:AAEPA_XIRIWgs0impNbx3yRNF9SnTwYIPI4", // ⬅️ ЗАМЕНИТЬ!
+                "Бот-Теста-Два"
+        ));
 
         log.warn("--- Тестовые тенанты загружены. Не забудьте заменить токены! ---");
     }

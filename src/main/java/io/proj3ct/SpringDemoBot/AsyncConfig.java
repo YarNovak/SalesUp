@@ -1,4 +1,4 @@
-package io.proj3ct.SpringDemoBot.multitenant;
+package io.proj3ct.SpringDemoBot;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +23,7 @@ public class AsyncConfig {
         executor.setQueueCapacity(100); // 100 задач могут ждать в очереди
         executor.setThreadNamePrefix("BotAsync-");
         executor.initialize();
+        System.out.println("SHA KONCHU");
         return executor;
     }
 }

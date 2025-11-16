@@ -1,22 +1,29 @@
-package io.proj3ct.SpringDemoBot.multitenant;
+package io.proj3ct.SpringDemoBot;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @RestController
 @RequestMapping("/api/webhook")
+
 public class TelegramWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(TelegramWebhookController.class);
 
+    @Autowired
     private final TenantService tenantService;
+
+    @Autowired
     private final UpdateProcessingService updateProcessingService;
 
     // Внедряем наши сервисы
     public TelegramWebhookController(TenantService tenantService, UpdateProcessingService updateProcessingService) {
+        System.out.println("SUKA");
         this.tenantService = tenantService;
         this.updateProcessingService = updateProcessingService;
     }
@@ -33,7 +40,7 @@ public class TelegramWebhookController {
                                                  @RequestBody Update update) {
 
         log.info("Получено обновление для тенанта: {}", botIdentifier);
-
+        System.out.println("SUKA2");
         // 1. Найти, какому боту (тенанту) пришло обновление
         TenantConfig config = tenantService.findConfigById(botIdentifier);
 

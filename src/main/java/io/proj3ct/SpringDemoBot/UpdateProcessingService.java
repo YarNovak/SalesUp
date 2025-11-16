@@ -1,8 +1,9 @@
-package io.proj3ct.SpringDemoBot.multitenant;
+package io.proj3ct.SpringDemoBot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -10,6 +11,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Service
+@EnableAsync
 public class UpdateProcessingService {
     private static final Logger log = LoggerFactory.getLogger(UpdateProcessingService.class);
 
