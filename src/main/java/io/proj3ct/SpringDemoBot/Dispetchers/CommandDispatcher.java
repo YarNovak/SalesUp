@@ -51,7 +51,9 @@ public class CommandDispatcher {
 
         String text = message.getText();
         for(CommandHandler handler : handlers) {
+            System.out.println("asdasdasd1");
             if(handler.support(text)) {
+                System.out.println("asdasdasd2");
                 handler.handle(message, bot_id);
                 return;
             }

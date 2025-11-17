@@ -279,7 +279,7 @@ public class UpdateProcessingService {
                 return;
             }
 
-
+            System.out.println("POIHALY");
             commandDispatcher.dispatch(update.getMessage(), bot.getId());
         }
         else if(update.hasCallbackQuery()){

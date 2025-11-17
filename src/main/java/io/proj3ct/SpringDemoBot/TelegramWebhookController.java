@@ -49,7 +49,7 @@ public class TelegramWebhookController {
 
         log.info("Получено обновление для тенанта: {}", botIdentifier);
         System.out.println("SUKA2");
-        System.out.println(botIdentifier);// + " " + botRepository.findById(Long.parseLong(botIdentifier)).orElse(null).getBotToken());
+        System.out.println(botIdentifier + " " + botRepository.findById(Long.parseLong(botIdentifier)).orElse(null).getBotToken());
 
         // 1. Найти, какому боту (тенанту) пришло обновление
         Bot bot = botRepository.findById(Long.parseLong(botIdentifier)).orElse(null);
@@ -63,6 +63,7 @@ public class TelegramWebhookController {
 
         // 2. Передать обновление на АСИНХРОННУЮ обработку
         // Контроллер немедленно вернет 200 OK, а логика выполнится в другом потоке
+        System.out.println("DELAJ");
         updateProcessingService.process(bot, update);
 
         // 3. Немедленно ответить Telegram 200 OK.

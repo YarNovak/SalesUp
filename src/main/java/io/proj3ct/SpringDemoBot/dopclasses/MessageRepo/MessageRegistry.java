@@ -28,18 +28,22 @@ public class MessageRegistry {
     private BotRepository botRepository;
 
     public void addMessage(Long chatId, Integer messageId) {
+        /*
         messagesToDelete
                 .computeIfAbsent(chatId, k -> new ConcurrentLinkedDeque<>())
                 .addLast(messageId);
+
+         */
     }
 
 
     public void clearMessages(Long chatId) {
-        messagesToDelete.remove(chatId);
+      //  messagesToDelete.remove(chatId);
     }
 
 
     public void deleteMessagesBefore(Long chatId, Integer targetMessageId, boolean inclusive, AbsSender bot) {
+        /*
         Deque<Integer> deque = messagesToDelete.get(chatId);
         if (deque == null || deque.isEmpty()) return;
 
@@ -69,11 +73,14 @@ public class MessageRegistry {
         if (deque.isEmpty()) {
             messagesToDelete.remove(chatId);
         }
+
+         */
     }
 
 
 
     public void deleteMessagesAfter(Long chatId, Integer targetMessageId, boolean inclusive, Long bot_id) {
+        /*
 
         Deque<Integer> deque = messagesToDelete.get(chatId);
 
@@ -103,7 +110,7 @@ public class MessageRegistry {
         }
 
 
-/*
+
         Deque<Integer> deque = messagesToDelete.get(chatId);
         if (deque == null || deque.isEmpty()) {
            return;}
@@ -148,6 +155,7 @@ public class MessageRegistry {
     private final Map<Long, StartMessage> startMessages = new ConcurrentHashMap<>();
 
     public void registerStartMessage(Long chatId, Integer messageId) {
+        /*
         startMessages.compute(chatId, (id, old) -> {
             if (old == null) {
                 return new StartMessage(chatId, messageId);
@@ -156,10 +164,12 @@ public class MessageRegistry {
                 return old;
             }
         });
+         */
     }
 
     public StartMessage getStartMessage(Long chatId) {
-        return startMessages.get(chatId);
+     //   return startMessages.get(chatId);
+        return null;
     }
 
     @Setter

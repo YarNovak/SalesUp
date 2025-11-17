@@ -96,26 +96,36 @@ public class TenantService {
         Bot bot = botRepository.findByBotToken(botToken)
                 .orElse(null);
 
+
         if (bot == null) {
             log.error("Бот із токеном {} не знайдено в базі!", botToken);
             return null;
         }
+
+
+
 
         // Створюємо AbsSender для цього токена
         try {
             log.debug("Створення нового AbsSender для токена {}", botToken.substring(0, 10) + "...");
 
             return new DefaultAbsSender(new DefaultBotOptions()) {
+
+
                 @Override
                 public String getBotToken() {
+                    System.out.println("SASAT");
                     return botToken;
                 }
+
             };
 
         } catch (Exception e) {
+            System.out.println("SAAS");
             log.error("Не вдалося створити AbsSender: " + e.getMessage(), e);
             return null;
         }
+
     }
 
 }
