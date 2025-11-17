@@ -1,21 +1,25 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.Orders;
 import io.proj3ct.SpringDemoBot.model.OrdersRepository;
 
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
+import io.proj3ct.SpringDemoBot.service.HowMuch;
 import io.proj3ct.SpringDemoBot.service.Wait_id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -24,16 +28,15 @@ import java.util.List;
 @Component
 public class CashCallbackHandler implements CallbackHandler{
 
-    TelegramLongPollingBot bot;
+
 
     @Autowired
     private OrdersRepository orderRepository;
 
-   // @Autowired
-   // private HowMuch wait_howmuchyouhave;
-
     @Autowired
-    private BotConfig config;
+    private HowMuch wait_howmuchyouhave;
+
+
 
     @Autowired
     Wait_id wait_id;
@@ -45,6 +48,10 @@ public class CashCallbackHandler implements CallbackHandler{
     private SendWhatever sendWhatever;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -52,25 +59,23 @@ public class CashCallbackHandler implements CallbackHandler{
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-         messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
-        this.bot = bot;
+         messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
 
         Long chatId = query.getMessage().getChatId();
 
-        Orders or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get();
+        Orders or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get();
         or.setCash_card("CASH");
         orderRepository.save(or);
-        send_id(chatId);
-
+        send_id(chatId, bot_id);
 
        // send_howmuchyouhave(chatId);
 
     }
 
 
-    public void send_id(Long chatId){
+    public void send_id(Long chatId, Long bot_id){
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
@@ -106,7 +111,9 @@ public class CashCallbackHandler implements CallbackHandler{
         wait_id.put(chatId, true);
 
 
-        sendWhatever.sendhere_message(bot, chatId, "phone",  null, keyboardMarkup);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        sendWhatever.sendhere_message(sender, chatId, "phone",  null, keyboardMarkup);
         //bot.execute(message);
 
 

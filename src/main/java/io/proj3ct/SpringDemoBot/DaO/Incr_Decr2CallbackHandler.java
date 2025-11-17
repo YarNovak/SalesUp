@@ -1,10 +1,12 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -13,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -22,8 +25,6 @@ import java.util.Optional;
 
 @Component
 public class Incr_Decr2CallbackHandler implements CallbackHandler {
-
-    TelegramLongPollingBot bot;
 
     @Autowired
     private CartItemRepository cartItemRepository;
@@ -50,6 +51,10 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
     private ButtonText buttonText;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -57,10 +62,12 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        this.bot = bot;
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
+
         System.out.println("Саси велику пипипу");
 
         Long chatId = query.getMessage().getChatId();
@@ -87,7 +94,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName()));
                 editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName()));
 
-                sendWhatever.edithere_readyVapecomponyKatalogMessage(bot, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
+                sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
 
             } else {
 
@@ -101,7 +108,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 markup.setKeyboard(List.of(List.of(addToCartBtn))); ////
                 editMessage.setReplyMarkup(markup);
 
-                sendWhatever.edithere_firstAdd(bot, chatId, messageId, cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()), markup);
+                sendWhatever.edithere_firstAdd(sender, chatId, messageId, cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()), markup);
             }
 
 
@@ -122,7 +129,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName()));
                 editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName()));
 
-                sendWhatever.edithere_readyVapecomponyKatalogMessage(bot, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
+                sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
 
             } else {
                 System.out.println("0000000000000000000000000000000000000000000000000000000");
@@ -140,7 +147,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 editMessage.setReplyMarkup(markup);
 
                 System.out.println("TUT");
-                sendWhatever.edithere_firstAdd(bot, chatId, messageId, cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()), markup);
+                sendWhatever.edithere_firstAdd(sender, chatId, messageId, cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()), markup);
 
 
 

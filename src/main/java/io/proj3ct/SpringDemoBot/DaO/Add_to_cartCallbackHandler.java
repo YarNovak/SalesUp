@@ -1,11 +1,13 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Formater.Formatter;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -26,7 +29,6 @@ import static io.proj3ct.SpringDemoBot.dopclasses.Formater.Formatter.formatEntit
 @Component
 public class Add_to_cartCallbackHandler implements CallbackHandler {
 
-    TelegramLongPollingBot bot;
 
     @Autowired
     private UserRepository userRepository;
@@ -58,6 +60,10 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
     private FinalItemService finalItemService;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -68,10 +74,11 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
     private Formatter formatter;
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
-            this.bot = bot;
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
 
             Long chatId = query.getMessage().getChatId();
             String callbackData = query.getData();
@@ -111,7 +118,8 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
         //editMessage.setEntities(fm.getEntities());
         editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName()));
 
-        sendWhatever.edithere_readyVapecomponyKatalogMessage(bot, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
+
+        sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
 
 /*
         try {

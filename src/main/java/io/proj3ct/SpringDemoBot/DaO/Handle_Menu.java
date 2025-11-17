@@ -1,15 +1,18 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -28,15 +31,15 @@ public class Handle_Menu {
 
     @Autowired
     private SendWhatever sendWhatever;
-
     @Autowired
-    private BotConfig config;
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
-    TelegramLongPollingBot bot;
 
-    public void handle(Long chatId, Long vp_id, TelegramLongPollingBot bot){
-        this.bot = bot;
-        List<Vapecompony_katalog> l =  vapecomponyKatalogRepository.findByVapecompony_idAndBot_Id(vp_id, Long.valueOf(config.getBoit()));
+    public void handle(Long chatId, Long vp_id, Long bot_id){
+
+        List<Vapecompony_katalog> l =  vapecomponyKatalogRepository.findByVapecompony_idAndBot_Id(vp_id, bot_id);
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -73,18 +76,11 @@ public class Handle_Menu {
 
         //executeMessage(message);
 
-        sendWhatever.sendhere_vapecompony(bot, chatId, vp_id, Long.valueOf(config.getBoit()), markupInLine, null);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        sendWhatever.sendhere_vapecompony(sender, chatId, vp_id, bot_id, markupInLine, null);
 
 
-    }
-
-
-    private void executeMessage(SendMessage message) {
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
     }
 
 

@@ -6,6 +6,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 public interface CommandHandler {
 
     boolean support(String command);
-    void handle(Message message, TelegramLongPollingBot bot);
+    void handle(Message message, Long bot_id);
 
 }

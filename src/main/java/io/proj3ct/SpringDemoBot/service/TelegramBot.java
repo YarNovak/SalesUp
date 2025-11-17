@@ -77,8 +77,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
 
-
-    final BotConfig config;
+    @Autowired
+    BotConfig config;
 
     @Autowired
     private Send sent;
@@ -194,81 +194,81 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
 
-        if(update.hasMessage()){
-
-            messageRegistry.addMessage(update.getMessage().getChatId(), update.getMessage().getMessageId());
-
-        }
-
-        Bot bot = botRepository.findById(Long.valueOf(config.getBoit())).get();
-
-
-        
-
-        if(bot.isActive()){
-            System.out.println("22222222222222222222222222");
-        }
-        else{
-            cacheDev.initButtonText();
-            cacheDev.initMessages();
-
-            Bot botik =  botRepository.findById(Long.valueOf(config.getBoit())).get();
-            botik.setActive(true);
-            botRepository.save(botik);
-
-        }
-
-
-
-        if( update.hasMessage() && update.getMessage().hasContact()){
-
-            if(wait_id.getOrDefault(update.getMessage().getChatId(), false)){
-
-                contactSendingHandler.get_contact(update, this);
-
-            }
-            else {
-                contactSendingHandler.no_contact(update, this);
-            }
-        }
-
-        else if (update.hasMessage() && update.getMessage().hasPhoto()){
-
-            long chatId = update.getMessage().getChatId();
-            System.out.println("02020202020202");
-            if (wait_photo.getOrDefault(chatId, false)){
-
-                photoHandler.photo_Handle(update, this);
-
-            }
-
-
-
-        }
-
-        else if(update.hasMessage() && update.getMessage().hasText()) {
-
-
-            if(add_DELIVERY.getOrDefault(update.getMessage().getChatId(), false)){
-
-                try {
-                    System.out.println("SOOOOOOOOOS");
-                    deliveryHandler.handle_Delivery(update, this);
-                }
-                catch (TelegramApiException e) {
-                    e.printStackTrace();
-                }
-
-
-                return;
-            }
-
-
-            commandDispatcher.dispatch(update.getMessage(), this);
-        }
-        else if(update.hasCallbackQuery()){
-            callbackDispatcher.dispatch(update.getCallbackQuery(), this);
-        }
+//        if(update.hasMessage()){
+//
+//            messageRegistry.addMessage(update.getMessage().getChatId(), update.getMessage().getMessageId());
+//
+//        }
+//
+//        Bot bot = botRepository.findById(Long.valueOf(config.getBoit())).get();
+//
+//
+//
+//
+//        if(bot.isActive()){
+//            System.out.println("22222222222222222222222222");
+//        }
+//        else{
+//            cacheDev.initButtonText();
+//            cacheDev.initMessages();
+//
+//            Bot botik =  botRepository.findById(Long.valueOf(config.getBoit())).get();
+//            botik.setActive(true);
+//            botRepository.save(botik);
+//
+//        }
+//
+//
+//
+//        if( update.hasMessage() && update.getMessage().hasContact()){
+//
+//            if(wait_id.getOrDefault(update.getMessage().getChatId(), false)){
+//
+//                contactSendingHandler.get_contact(update, this);
+//
+//            }
+//            else {
+//                contactSendingHandler.no_contact(update, this);
+//            }
+//        }
+//
+//        else if (update.hasMessage() && update.getMessage().hasPhoto()){
+//
+//            long chatId = update.getMessage().getChatId();
+//            System.out.println("02020202020202");
+//            if (wait_photo.getOrDefault(chatId, false)){
+//
+//                photoHandler.photo_Handle(update, this);
+//
+//            }
+//
+//
+//
+//        }
+//
+//        else if(update.hasMessage() && update.getMessage().hasText()) {
+//
+//
+//            if(add_DELIVERY.getOrDefault(update.getMessage().getChatId(), false)){
+//
+//                try {
+//                    System.out.println("SOOOOOOOOOS");
+//                    deliveryHandler.handle_Delivery(update, this);
+//                }
+//                catch (TelegramApiException e) {
+//                    e.printStackTrace();
+//                }
+//
+//
+//                return;
+//            }
+//
+//
+//            commandDispatcher.dispatch(update.getMessage(), bot.getId());
+//        }
+//        else if(update.hasCallbackQuery()){
+//            callbackDispatcher.dispatch(update.getCallbackQuery(), bot.getId());
+//        }
 
     }
 

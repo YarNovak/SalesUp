@@ -2,10 +2,12 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.MessagesInf;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -24,7 +27,6 @@ import java.util.Optional;
 public class Incr_DecrCallbackHandler implements CallbackHandler {
 
 
-    TelegramLongPollingBot bot;
 
     @Autowired
     private CartItemRepository cartItemRepository;
@@ -38,10 +40,6 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
     @Autowired
     private OrdersRepository orderRepository;
 
-
-    @Autowired
-    private BotConfig config;
-
     @Autowired
     private ButtonText buttonText;
 
@@ -51,6 +49,10 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
     private MessagesInf messagesInf;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -58,10 +60,12 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query,  Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
-            this.bot = bot;
+
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
+
 
             Long chatId = query.getMessage().getChatId();
             String callbackData = query.getData();
@@ -69,21 +73,21 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
         System.out.println("YAWAHUI");
 
-        if(sendcart_nope(chatId)) return;
+        if(sendcart_nope(chatId, bot_id)) return;
         ///////////////////////////////
         Long itemtId = Long.parseLong(callbackData.split("_")[1]);
         if (callbackData.startsWith("incr_")) {
-            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get();
-            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()));
+            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
+            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
             cartService.addToCart(chatId, product.get());
 
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(String.valueOf(chatId));
             editMessage.setMessageId(messageId);
             editMessage.setParseMode("MarkdownV2");
-            editMessage.setText(sendCarteditor_Text(chatId));
-            editMessage.setText(sendCarteditor_Text(chatId));
-            editMessage.setReplyMarkup(sendCarteditor_KB(chatId));
+            editMessage.setText(sendCarteditor_Text(chatId, bot_id));
+            editMessage.setText(sendCarteditor_Text(chatId, bot_id));
+            editMessage.setReplyMarkup(sendCarteditor_KB(chatId, bot_id));
 
             if(editMessage.getText().isEmpty()){
 
@@ -91,33 +95,33 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
             }
 
             try {
-                bot.execute(editMessage);
+                sender.execute(editMessage);
 
             } catch (TelegramApiException e) {
                 throw new RuntimeException(e);
             }
 
         } else if (callbackData.startsWith("decr_")) {
-            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get();
-            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()));
+            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
+            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
             cartService.deleteFromCart(chatId, product.get());
 
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(String.valueOf(chatId));
             editMessage.setMessageId(messageId);
-            editMessage.setText(sendCarteditor_Text(chatId));
+            editMessage.setText(sendCarteditor_Text(chatId, bot_id));
             editMessage.setParseMode("MarkdownV2");
-            editMessage.setReplyMarkup(sendCarteditor_KB(chatId));
+            editMessage.setReplyMarkup(sendCarteditor_KB(chatId, bot_id));
 
             if(editMessage.getText().isEmpty()){
 
-                sendWhatever.edithere_emptycart(bot, chatId, messageId, "clearing", sendCarteditor_KB(chatId), null);
+                sendWhatever.edithere_emptycart(sender, chatId, messageId, "clearing", sendCarteditor_KB(chatId, bot_id), null);
 
                 return;
             }
 
             try {
-                bot.execute(editMessage);
+                sender.execute(editMessage);
 
             } catch (TelegramApiException e) {
                 throw new RuntimeException(e);
@@ -128,13 +132,13 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
 
     }
-    private boolean sendcart_nope(Long chatId){
+    private boolean sendcart_nope(Long chatId, Long bot_id){
 
-        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
-
+        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).isPresent()) {
+            AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
             SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
             sendMessage.setParseMode("MarkdownV2");
-            sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            sendWhatever.sendhere_message(sender, chatId, "please_whait", null, null);
             return true;
         }
         return  false;
@@ -142,12 +146,12 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
     }
 
-    private String sendCarteditor_Text(Long chatId){
+    private String sendCarteditor_Text(Long chatId, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
             sb.append(escapeMarkdown(""));
             return sb.toString();
@@ -188,14 +192,14 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
         return sb.toString();
     }
 
-    private InlineKeyboardMarkup sendCarteditor_KB(Long chatId){
+    private InlineKeyboardMarkup sendCarteditor_KB(Long chatId, Long bot_id){
 
 
 
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
 
-        List<CartItem> items = cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items = cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
 
         if(items.isEmpty()){
 

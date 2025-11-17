@@ -2,6 +2,7 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
@@ -17,6 +18,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 @Component
 public class ContactSendingHandler {
 
-    TelegramLongPollingBot bot;
+
     @Autowired
     private Wait_id wait_id;
 
@@ -50,18 +52,18 @@ public class ContactSendingHandler {
     private ButtonText buttonText;
     @Autowired
     private SendWhatever sendWhatever;
+    @Autowired
+    private TenantService tenantService;
 
 
-    public void get_contact(Update update, TelegramLongPollingBot bot) {
+    public void get_contact(Update update, Long bot_id) {
 
 
 
-        this.bot = bot;
 
         Long chatId = update.getMessage().getChatId();
 
-
-        sendKeyboard(chatId, "Теперь у нас есть возможность быть к вам ближе!)");
+        sendKeyboard(chatId, "Теперь у нас есть возможность быть к вам ближе!)", bot_id);
 
         wait_id.remove(chatId);
 
@@ -72,20 +74,19 @@ public class ContactSendingHandler {
         //InputMediaPhoto inputMedia = new InputMediaPhoto(fileId);
 
         media.put(chatId, update.getMessage().getContact());
-        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getCash_card().equals("CASH")) sendchoise_message2(chatId, "CASH");
-        else sendchoise_message2(chatId, "CARD");
+        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getCash_card().equals("CASH")) sendchoise_message2(chatId, "CASH", bot_id);
+        else sendchoise_message2(chatId, "CARD", bot_id);
 
         return;
 
     }
-    public void no_contact(Update update, TelegramLongPollingBot bot) {
+    public void no_contact(Update update, Long bot_id) {
 
-        this.bot = bot;
-
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(), "Что-то явно пошло не так\uD83D\uDE05");
 
         try{
-            bot.execute(sendMessage);
+            sender.execute(sendMessage);
         }
         catch(TelegramApiException e){
             e.printStackTrace();
@@ -94,7 +95,7 @@ public class ContactSendingHandler {
     }
 
 
-    private void sendKeyboard(long chatId, String textToSend) {
+    private void sendKeyboard(long chatId, String textToSend, Long bot_id) {
 
 
         SendMessage message = new SendMessage();
@@ -126,21 +127,15 @@ public class ContactSendingHandler {
 
 
         //executeMessage(message);
-        sendWhatever.sendhere_message(bot, chatId, "phone_thanks",  null, keyboardMarkup);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(sender, chatId, "phone_thanks",  null, keyboardMarkup);
 
 
 
     }
 
-    private void executeMessage(SendMessage message){
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
 
-        }
-    }
-
-    public void sendchoise_message2(long chatId, String cur){
+    public void sendchoise_message2(long chatId, String cur, Long bot_id){
 
 
         add_DELIVERY.put(chatId, true);
@@ -180,7 +175,8 @@ public class ContactSendingHandler {
                 "✅bufynek 180.\n" +
                 "✅kod pocztowy 10007.");
 
-        sendWhatever.sendhere_message(bot, chatId, "delivery",  null, null);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(sender, chatId, "delivery",  null, null);
 
     }
 

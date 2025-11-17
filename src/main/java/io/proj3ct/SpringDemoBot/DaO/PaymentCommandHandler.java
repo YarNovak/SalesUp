@@ -36,9 +36,6 @@ public class PaymentCommandHandler implements CommandHandler {
     private OrdersRepository orderRepository;
 
     @Autowired
-    private BotConfig config;
-
-    @Autowired
     private BotRepository botRepository;
 
     @Autowired
@@ -57,16 +54,15 @@ public class PaymentCommandHandler implements CommandHandler {
     TelegramLongPollingBot bot;
 
     @Override
-    public void handle(Message message, TelegramLongPollingBot bot) {
+    public void handle(Message message, Long bot_id) {
 
         messageRegistry.deleteMessagesBefore(message.getChatId(), message.getMessageId(), false, bot);
 
         System.out.println("fuck");
-        this.bot = bot;
         Long chatId = message.getChatId();
         int messageId = message.getMessageId();
 
-        if(cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit())).isEmpty()){
+        if(cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id).isEmpty()){
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(String.valueOf(chatId));
 
@@ -96,38 +92,38 @@ public class PaymentCommandHandler implements CommandHandler {
 
         }
         else{
-            create_order(chatId);
-            send_pay(chatId, messageId);
+            create_order(chatId, bot_id);
+            send_pay(chatId, messageId, bot_id);
         }
 
 
     }
-    private void create_order(Long chatId) {
+    private void create_order(Long chatId, Long bot_id) {
 
-        if (!userRepository.existsByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()))) {
+        if (!userRepository.existsByChatIdAndBot_Id(chatId, bot_id)) {
             User user = new User();
             user.setChatId(chatId);
-            user.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            user.setBot(botRepository.findById(bot_id).get());
             userRepository.save(user);
         }
 
 
         //if(orderRepository.findByUser_ChatIdAndPaidEquals(userRepository.findByChatId(chatId).get().getChatId(), false).isPresent())
 
-        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get().getChatId(), false, Long.valueOf(config.getBoit())).isPresent()){
+        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(userRepository.findByChatIdAndBot_Id(chatId, bot_id).get().getChatId(), false, bot_id).isPresent()){
 
-            Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get();
+            Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get();
             order.setUser(userRepository.findById(chatId).get());
             order.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             order.setStatus("inprocces");
-            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, bot_id);
             System.out.println(order.getCreatedAt().toString());
             List<FinalItem> finalItems = cartItems.stream().map(cartItem -> {
                 FinalItem finalItem = new FinalItem();
                 finalItem.setName(cartItem.getVapecomponyKatalog().getName());
                 finalItem.setCena(cartItem.getVapecomponyKatalog().getCena());
                 finalItem.setQuantity(cartItem.getQuantity());
-                finalItem.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+                finalItem.setBot(botRepository.findById(bot_id).get());
                 finalItem.setOrder(order);
                 finalItem.setVid(cartItem.getVapecomponyKatalog().getId());
                 return finalItem;
@@ -135,29 +131,29 @@ public class PaymentCommandHandler implements CommandHandler {
 
 
             order.setFinalItems(finalItems);
-            order.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            order.setBot(botRepository.findById(bot_id).get());
             orderRepository.save(order);
         }
         //if(((orderRepository.findByUser_ChatIdAndPaidEquals(userRepository.findByChatId(chatId).get().getChatId(), true).isPresent()) && (orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).isEmpty()))  || (orderRepository.findByUser_ChatId(chatId).isEmpty()))
         else{
             Orders order = new Orders();
-            order.setUser(userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get());
+            order.setUser(userRepository.findByChatIdAndBot_Id(chatId, bot_id).get());
             order.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             order.setStatus("inprocces");
-            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, bot_id);
             System.out.println(order.getCreatedAt().toString());
             List<FinalItem> finalItems = cartItems.stream().map(cartItem -> {
                 FinalItem finalItem = new FinalItem();
                 finalItem.setName(cartItem.getVapecomponyKatalog().getName());
                 finalItem.setCena(cartItem.getVapecomponyKatalog().getCena());
                 finalItem.setQuantity(cartItem.getQuantity());
-                finalItem.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+                finalItem.setBot(botRepository.findById(bot_id).get());
                 finalItem.setOrder(order);
                 finalItem.setVid(cartItem.getVapecomponyKatalog().getId());
                 return finalItem;
             }).collect(Collectors.toList());
 
-            order.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            order.setBot(botRepository.findById(bot_id).get());
             order.setFinalItems(finalItems);
             orderRepository.save(order);
         }
@@ -167,12 +163,12 @@ public class PaymentCommandHandler implements CommandHandler {
         //else if(orderRepository.findByUser_ChatIdAndPaidEquals(userRepository.findByChatId(chatId).get().getChatId(), true).isPresent()) {}
 
     }
-    public void send_pay(long chatId, int messageId){
+    public void send_pay(long chatId, int messageId, Long bot_id){
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setParseMode("MarkdownV2");
-        message.setText(sendCarteditor_Text(chatId));
+        message.setText(sendCarteditor_Text(chatId, bot_id));
 
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -180,7 +176,7 @@ public class PaymentCommandHandler implements CommandHandler {
 
         List<InlineKeyboardButton> row1 = new ArrayList<>();
 
-        Bot botik = botRepository.findById(Long.valueOf(config.getBoit())).get();
+        Bot botik = botRepository.findById(bot_id).get();
 
 
 
@@ -216,12 +212,12 @@ public class PaymentCommandHandler implements CommandHandler {
 
     }
 
-    private String sendCarteditor_Text(Long chatId){
+    private String sendCarteditor_Text(Long chatId, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
             sb.append(escapeMarkdown(""));
             return sb.toString();

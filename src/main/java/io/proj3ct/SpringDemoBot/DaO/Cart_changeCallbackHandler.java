@@ -1,10 +1,12 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -12,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -21,7 +24,6 @@ import java.util.Optional;
 @Component
 public class Cart_changeCallbackHandler implements CallbackHandler {
 
-    TelegramLongPollingBot bot;
 
     @Autowired
     private OrdersRepository orderRepository;
@@ -42,6 +44,10 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
 
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -49,13 +55,12 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
 
-        this.bot = bot;
         if(sendcart_nope(query.getMessage().getChatId())) return;
-        sendCarteditor(query.getMessage().getChatId());
+        sendCarteditor(query.getMessage().getChatId(), bot_id);
 
     }
 
@@ -85,7 +90,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
 
     }
 
-    private void   sendCarteditor(Long chatId){
+    private void   sendCarteditor(Long chatId, Long bot_id){
 
 
         SendMessage message = new SendMessage();
@@ -115,7 +120,8 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
             markupInLine.setKeyboard(rowsInLine);
             message.setReplyMarkup(markupInLine);
 
-            sendWhatever.sendhere_message(bot, chatId, "clearing",  markupInLine, null);
+            AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+            sendWhatever.sendhere_message(sender, chatId, "clearing",  markupInLine, null);
 
         }
         else{
@@ -183,17 +189,18 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
             message.setReplyMarkup(markup);
             message.setText(sb.toString());
 
-            executeMessage(message);
+            executeMessage(message, bot_id);
         }
 
 
 
     }
-    private void executeMessage(SendMessage message){
+    private void executeMessage(SendMessage message, Long bot_id){
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         try {
-            bot.execute(message);
+            sender.execute(message);
         } catch (TelegramApiException e) {
-
+            throw new RuntimeException(e);
         }
     }
     private String escapeMarkdown(String text) {

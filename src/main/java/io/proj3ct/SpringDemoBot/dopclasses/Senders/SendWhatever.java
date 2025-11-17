@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.MessagesInf;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.model.Vapecompony;
 import io.proj3ct.SpringDemoBot.model.VapecomponyKatalogRepository;
 import io.proj3ct.SpringDemoBot.model.VapecomponyRepository;
 import io.proj3ct.SpringDemoBot.model.Vapecompony_katalog;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
+import org.apache.commons.math3.analysis.function.Abs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -26,6 +29,7 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaVideo;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
@@ -44,11 +48,16 @@ public class SendWhatever {
     private VapecomponyKatalogRepository vapecomponyKatalogRepository;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
 
-    public void sendhere_message(TelegramLongPollingBot bot, Long chatId, String key, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup) {
+    public void sendhere_message(AbsSender sender, Long chatId, String key, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup) {
 
             String type = "text";
+
 
             if(messagesinf.getMy_messages().get(key).getPhoto()!=null) {type = "photo";}
             else if(messagesinf.getMy_messages().get(key).getVideo()!=null) {type = "video";}
@@ -86,7 +95,7 @@ public class SendWhatever {
 
                 try{
 
-                   Message m = bot.execute(sendPhoto);
+                   Message m = sender.execute(sendPhoto);
                    messageRegistry.addMessage(m.getChatId(), m.getMessageId());
 
                 }
@@ -130,7 +139,7 @@ public class SendWhatever {
 
                 try{
 
-                    Message m =bot.execute(sendVideo);
+                    Message m = sender.execute(sendVideo);
                     messageRegistry.addMessage(m.getChatId(), m.getMessageId());
                 }
                 catch(TelegramApiException e){
@@ -169,7 +178,7 @@ public class SendWhatever {
                 }
 
                 try{
-                   Message m = bot.execute(sendMessage);
+                   Message m = sender.execute(sendMessage);
                     messageRegistry.addMessage(m.getChatId(), m.getMessageId());
                 }
                 catch(TelegramApiException e){
@@ -180,7 +189,7 @@ public class SendWhatever {
 
     }
 
-    public void sendhere_vapecompony(TelegramLongPollingBot bot, Long chatId, Long key, Long bot_id, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup){
+    public void sendhere_vapecompony(AbsSender sender, Long chatId, Long key, Long bot_id, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup){
 
 
         Vapecompony vapecompony = vapecomponyRepository.findByIdAndBot_Id(key, bot_id).orElseThrow( () -> new RuntimeException());
@@ -215,7 +224,7 @@ public class SendWhatever {
 
             try{
 
-                Message m = bot.execute(sendPhoto);
+                Message m = sender.execute(sendPhoto);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
 
             }
@@ -249,7 +258,7 @@ public class SendWhatever {
 
             try{
 
-               Message m = bot.execute(sendVideo);
+               Message m = sender.execute(sendVideo);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
@@ -277,7 +286,7 @@ public class SendWhatever {
             }
 
             try{
-               Message m = bot.execute(sendMessage);
+               Message m = sender.execute(sendMessage);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
@@ -288,9 +297,10 @@ public class SendWhatever {
 
     }
 
-    public void sendhere_firstAdd(TelegramLongPollingBot bot, Long chatId, Long key, Long bot_id, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup)
+    public void sendhere_firstAdd(Long chatId, Long key, Long bot_id, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup)
     {
 
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         Vapecompony_katalog vapecompony = vapecomponyKatalogRepository.findByIdAndBot_Id(key, bot_id).orElseThrow( () -> new RuntimeException());
 
 
@@ -323,7 +333,7 @@ public class SendWhatever {
 
             try{
 
-              Message m =  bot.execute(sendPhoto);
+              Message m =  sender.execute(sendPhoto);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
 
             }
@@ -357,7 +367,7 @@ public class SendWhatever {
 
             try{
 
-               Message m = bot.execute(sendVideo);
+               Message m = sender.execute(sendVideo);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
@@ -385,7 +395,7 @@ public class SendWhatever {
             }
 
             try{
-               Message m = bot.execute(sendMessage);
+               Message m = sender.execute(sendMessage);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
@@ -395,7 +405,7 @@ public class SendWhatever {
 
     }
 
-    public void edithere_firstAdd(TelegramLongPollingBot bot, Long chatId, Integer messageId, Long key, Long bot_id, InlineKeyboardMarkup markupInLine) {
+    public void edithere_firstAdd(AbsSender sender, Long chatId, Integer messageId, Long key, Long bot_id, InlineKeyboardMarkup markupInLine) {
 
         Vapecompony_katalog vapecompony = vapecomponyKatalogRepository
                 .findByIdAndBot_Id(key, bot_id)
@@ -430,7 +440,7 @@ public class SendWhatever {
             }
 
             try {
-                bot.execute(editCaption);
+                sender.execute(editCaption);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -449,14 +459,14 @@ public class SendWhatever {
             }
 
             try {
-                bot.execute(editText);
+                sender.execute(editText);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void sendhere_readyVapecomponyKatalogMessage(TelegramLongPollingBot bot, Vapecompony_katalog vapecompony, Long chatId, String text, String parsemode,  Long bot_id, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup){
+    public void sendhere_readyVapecomponyKatalogMessage(Vapecompony_katalog vapecompony, Long chatId, String text, String parsemode,  AbsSender sender, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup){
 
 
 
@@ -491,7 +501,7 @@ public class SendWhatever {
 
             try{
 
-               Message m = bot.execute(sendPhoto);
+               Message m = sender.execute(sendPhoto);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
 
             }
@@ -527,7 +537,7 @@ public class SendWhatever {
 
             try{
 
-               Message m =bot.execute(sendVideo);
+               Message m = sender.execute(sendVideo);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
@@ -556,7 +566,7 @@ public class SendWhatever {
             }
 
             try{
-               Message m = bot.execute(sendMessage);
+               Message m = sender.execute(sendMessage);
                 messageRegistry.addMessage(m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
@@ -574,7 +584,7 @@ public class SendWhatever {
 
 
 
-            TelegramLongPollingBot bot,
+            AbsSender sender,
             Vapecompony_katalog vapecompony,
             Long chatId,
             Integer messageId,
@@ -609,7 +619,7 @@ public class SendWhatever {
             }
 
             try {
-                bot.execute(editCaption);
+                sender.execute(editCaption);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -630,7 +640,7 @@ public class SendWhatever {
             }
 
             try {
-                bot.execute(editText);
+                sender.execute(editText);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -638,7 +648,7 @@ public class SendWhatever {
     }
 
     public void edithere_emptycart(
-            TelegramLongPollingBot bot,
+            AbsSender sender,
             Long chatId,
             Integer messageId,
             String key,
@@ -674,7 +684,7 @@ public class SendWhatever {
                     editText.setReplyMarkup(markupInLine);
                 }
 
-                bot.execute(editText);
+             sender.execute(editText);
 
 
         } catch (TelegramApiException | JsonProcessingException e) {

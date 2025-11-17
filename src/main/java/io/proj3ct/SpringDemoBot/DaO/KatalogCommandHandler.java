@@ -3,6 +3,7 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.Cash.VapecomponyRepository_working_withBD.VapecomponyController;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.Vapecompony;
@@ -23,6 +24,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -57,11 +59,7 @@ public class KatalogCommandHandler implements CommandHandler {
     VapecomponyRepository vape;
 
     @Autowired
-    private BotConfig config;
-
-    @Autowired
     private RestTemplate restTemplate;
-    TelegramLongPollingBot bot;
 
     @Autowired
     private VapecomponyService vapecomponyService;
@@ -71,7 +69,8 @@ public class KatalogCommandHandler implements CommandHandler {
 
     @Autowired
     private ButtonText buttonText;
-
+    @Autowired
+    private TenantService tenantService;
 
 
     @Override
@@ -82,17 +81,15 @@ public class KatalogCommandHandler implements CommandHandler {
 
     @Override
     @Transactional
-    public void handle(Message message, TelegramLongPollingBot bot) {
+    public void handle(Message message, Long bot_id) {
 
-        this.bot = bot;
-
-        send_compony_repository(message.getChatId());
+        send_compony_repository(message.getChatId(), bot_id);
 
 
 
     }
 
-    private void send_compony_repository(long chatId) {
+    private void send_compony_repository(long chatId, Long bot_id) {
 
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -108,7 +105,7 @@ public class KatalogCommandHandler implements CommandHandler {
 
 
         long k = 0;
-        List<Vapecompony> vcr = StreamSupport.stream(vapecomponyRepository.findAllByBot_Id(Long.valueOf(config.getBoit())).spliterator(), false)
+        List<Vapecompony> vcr = StreamSupport.stream(vapecomponyRepository.findAllByBot_Id(bot_id).spliterator(), false)
                 .collect(Collectors.toList());
 
         while(vcr.size()>0){
@@ -132,20 +129,13 @@ public class KatalogCommandHandler implements CommandHandler {
         message.setReplyMarkup(markupInLine);
 
         //executeMessage(message);
-
-        sendWhatever.sendhere_message(bot, chatId, "catalog",  markupInLine, null);
+        AbsSender sender =tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(sender, chatId, "catalog",  markupInLine, null);
 
 
 
     }
 
-    private void executeMessage(SendMessage message) {
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
     private void verifySavedItem(Vapecompony item) {
         boolean exists = vape.existsById(item.getId());
         log.info("Item {} exists in DB: {}", item.getId(), exists);

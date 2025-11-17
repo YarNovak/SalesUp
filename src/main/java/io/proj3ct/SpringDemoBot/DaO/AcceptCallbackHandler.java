@@ -1,17 +1,18 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.OrderService;
 import io.proj3ct.SpringDemoBot.model.Orders;
 import io.proj3ct.SpringDemoBot.model.OrdersRepository;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import io.proj3ct.SpringDemoBot.service.Send;
 import io.proj3ct.SpringDemoBot.service.TelegramBot.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.dao.PersistenceExceptionTranslationAutoConfiguration;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -19,6 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -28,20 +30,18 @@ import java.util.List;
 public class AcceptCallbackHandler implements CallbackHandler {
 
 
-
-    @Autowired
-    private BotConfig config;
-
-
-    TelegramLongPollingBot bot;
-
     @Autowired
     private OrdersRepository orderRepository;
+
+    @Autowired
+    private TenantService tenantService;
 
     @Autowired
     private OrderService orderService;
     @Autowired
     private SendWhatever sendWhatever;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -49,9 +49,8 @@ public class AcceptCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        this.bot = bot;
 
         Long chatId = query.getMessage().getChatId();
         String callbackData = query.getData();
@@ -65,7 +64,7 @@ public class AcceptCallbackHandler implements CallbackHandler {
 
 
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId,Long.valueOf(config.getBoit()) ).get().getUser().getChatId()));
+        sendMessage.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId,bot_id).get().getUser().getChatId()));
         sendMessage.setText("Ваш заказ принят \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89\n" +
                 "\nОжидайте дальнейшей информации на счет " +
                 "доставки, либо жижи в тумбочке не будет \uD83D\uDE01");
@@ -87,9 +86,9 @@ public class AcceptCallbackHandler implements CallbackHandler {
 
         SendAnimation sa = new SendAnimation();
         sa.setAnimation(new InputFile("https://i.gifer.com/7GNa.gif"));
-        sa.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId,Long.valueOf(config.getBoit())).get().getUser().getChatId()));
+        sa.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId,bot_id).get().getUser().getChatId()));
 
-            Orders order = orderRepository.findByIdAndBot_Id(itemtId,Long.valueOf(config.getBoit())).get();
+            Orders order = orderRepository.findByIdAndBot_Id(itemtId,bot_id).get();
             order.setStatus("payed");;
             orderRepository.save(order);
 
@@ -97,14 +96,19 @@ public class AcceptCallbackHandler implements CallbackHandler {
                 "\nОжидайте дальнейшей информации на счет " +
                 "доставки, либо жижи в тумбочке не будет \uD83D\uDE01");
 
+
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
         try {
             // sendText(orderRepository.findById(itemtId).get().getUser().getChatId(), "\uD83D\uDC4C");
             // execute(sendMessage);
            // bot.execute(
              //       sa
            // );
-            sendWhatever.sendhere_message(bot, order.getUser().getChatId(), "accept",  null, null);
-            bot.execute(editMarkup);
+
+
+            sendWhatever.sendhere_message(sender, order.getUser().getChatId(), "accept",  null, null);
+            sender.execute(editMarkup);
 
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);

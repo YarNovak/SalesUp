@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -56,9 +57,9 @@ public class PhotoHandler {
     private OrderService orderService;
 
 
-    public void photo_Handle(Update update, TelegramLongPollingBot bot) {
+    public void photo_Handle(Update update, Long bot_id) {
 
-        this.bot = bot;
+
         Long chatId = update.getMessage().getChatId();
 
         Contact contact =  media.get(chatId);

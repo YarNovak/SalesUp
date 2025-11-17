@@ -27,8 +27,6 @@ public class DenyCallbackHandler implements CallbackHandler {
     TelegramLongPollingBot bot;
 
 
-    @Autowired
-    private BotConfig config;
 
     @Override
     public boolean support(String callbackData) {
@@ -45,9 +43,9 @@ public class DenyCallbackHandler implements CallbackHandler {
     private OrderService orderService;
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        this.bot = bot;
+
 
         Long chatId = query.getMessage().getChatId();
         String callbackData = query.getData();
@@ -56,9 +54,9 @@ public class DenyCallbackHandler implements CallbackHandler {
         Long itemtId = Long.parseLong(callbackData.split("_")[1]);
         //sent.remove(orderRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get().getUser().getChatId());
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get().getUser().getChatId()));
+        sendMessage.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId, bot_id).get().getUser().getChatId()));
 
-        Orders order = orderRepository.findByIdAndBot_Id(itemtId,Long.valueOf(config.getBoit())).get();
+        Orders order = orderRepository.findByIdAndBot_Id(itemtId,bot_id).get();
 
         sendMessage.setText("Ваше замовлення відхилено))");
 
@@ -80,7 +78,7 @@ public class DenyCallbackHandler implements CallbackHandler {
 
         SendAnimation photo = new SendAnimation();
 
-        photo.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get().getUser().getChatId()));
+        photo.setChatId(String.valueOf(orderRepository.findByIdAndBot_Id(itemtId, bot_id).get().getUser().getChatId()));
         photo.setAnimation(new InputFile("https://cs7.pikabu.ru/post_img/2014/03/01/7/1393669621_572189444.gif"));
         photo.setCaption("Ваш заказ был отклонен \uD83D\uDE22\n" +
                 "Напишите одному из наших менеджеров:\n" +

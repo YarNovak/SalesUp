@@ -1,16 +1,17 @@
 package io.proj3ct.SpringDemoBot.dopclasses.MessageRepo;
 
+import io.proj3ct.SpringDemoBot.TenantService;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -18,8 +19,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Service
 public class MessageRegistry {
 
+    @Autowired
+    TenantService tenantService;
+
     private final Map<Long, Deque<Integer>> messagesToDelete = new ConcurrentHashMap<>();
     private StartMessage startMessage;
+    @Autowired
+    private BotRepository botRepository;
 
     public void addMessage(Long chatId, Integer messageId) {
         messagesToDelete
@@ -67,9 +73,12 @@ public class MessageRegistry {
 
 
 
-    public void deleteMessagesAfter(Long chatId, Integer targetMessageId, boolean inclusive, AbsSender bot) {
+    public void deleteMessagesAfter(Long chatId, Integer targetMessageId, boolean inclusive, Long bot_id) {
 
         Deque<Integer> deque = messagesToDelete.get(chatId);
+
+        AbsSender sender;
+        sender = tenantService.getSender(Objects.requireNonNull(botRepository.findById(bot_id).orElse(null)).getBotToken());
         if (deque == null || deque.isEmpty()) return;
 
         for (Integer messageId : List.copyOf(deque)) {
@@ -79,7 +88,7 @@ public class MessageRegistry {
 
             if (shouldDelete) {
                 try {
-                    bot.execute(new DeleteMessage(chatId.toString(), messageId));
+                    sender.execute(new DeleteMessage(chatId.toString(), messageId));
                     System.out.println("✅ Видалено повідомлення: " + messageId);
                 } catch (Exception e) {
                     System.err.println("❌ Не вдалося видалити повідомлення " + messageId + ": " + e.getMessage());

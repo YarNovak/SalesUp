@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -52,7 +53,6 @@ public class DeliveryHandler {
     @Autowired
     private CartItemRepository cartItemRepository;
 
-    TelegramLongPollingBot bot;
     @Autowired
     private ButtonText buttonText;
 
@@ -67,9 +67,9 @@ public class DeliveryHandler {
     @Autowired
     private BotRepository botRepository;
 
-    public void handle_Delivery(Update update, TelegramLongPollingBot bot) throws TelegramApiException {
+    public void handle_Delivery(Update update, AbsSender sender) throws TelegramApiException {
 
-        this.bot = bot;
+
 
 
         Long chatId = update.getMessage().getChatId();
@@ -84,7 +84,7 @@ public class DeliveryHandler {
 
         if((!vapecomponyKatalogRepository.findByNameAndBot_Id(messageText, Long.valueOf(config.getBoit())).isEmpty()) ||(messageText.startsWith("/")) || (messageText.equals(catalog)) || (messageText.equals(cart)) || (messageText.equals(payment) ) && (!messageText.equals(botMessageRepository.findByMessageKeyAndBot_Id("delivery", Long.valueOf(config.getBoit())).get()))) {
 
-            sendWhatever.sendhere_message(bot, chatId, "delivery",  null, null);
+            sendWhatever.sendhere_message(sender, chatId, "delivery",  null, null);
             return;
         }
 
@@ -110,7 +110,7 @@ public class DeliveryHandler {
                   // sendText(chatId, config.get_exet_card());
                                     */
 
-                    sendWhatever.sendhere_message(bot, chatId, "send_money",  null, null);
+                    sendWhatever.sendhere_message(sender, chatId, "send_money",  null, null);
                    // wait_photo.put(chatId, true);
                     return;
 
@@ -132,7 +132,7 @@ public class DeliveryHandler {
                     sendText(chatId, config.getUkr_card());
 
                      */
-                    sendWhatever.sendhere_message(bot, chatId, "send_money",  null, null);
+                    sendWhatever.sendhere_message(sender, chatId, "send_money",  null, null);
                     wait_photo.put(chatId, true);
                     return;
 
@@ -194,7 +194,7 @@ public class DeliveryHandler {
 
                      */
 
-                    sendWhatever.sendhere_message(bot, chatId, "congrat",  null, null);
+                    sendWhatever.sendhere_message(sender, chatId, "congrat",  null, null);
 
                     // Orders ord = orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).get();
                     User us = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get();
@@ -209,8 +209,8 @@ public class DeliveryHandler {
                     adres.remove(chatId);
 
                     orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId(), chatId);
-                    bot.execute(photo);
-                    bot.execute(sendContact);
+                    sender.execute(photo);
+                    sender.execute(sendContact);
 
                     return;
 
@@ -260,12 +260,6 @@ public class DeliveryHandler {
         return total;
     }
 
-    public void sendText(Long chatId, String text) throws TelegramApiException {
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId.toString());
-        message.setText(text);
-        bot.execute(message);
-    }
 
 
     private String sendCarteditor_Text(Long chatId){

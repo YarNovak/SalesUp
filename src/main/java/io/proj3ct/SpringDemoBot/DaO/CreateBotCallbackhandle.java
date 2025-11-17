@@ -31,7 +31,7 @@ public class CreateBotCallbackhandle implements CallbackHandler{
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 /*
         Long telegramId = query.getFrom().getId();
         Optional<PlatformUser> userOpt = userRepository.findByTelegramId(telegramId);

@@ -1,9 +1,11 @@
 package io.proj3ct.SpringDemoBot.Dispetchers;
 
 import io.proj3ct.SpringDemoBot.DaO.CommandHandler;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -36,18 +39,20 @@ public class CommandDispatcher {
     private BotConfig config;
     @Autowired
             private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
-    TelegramLongPollingBot bot;
 
-    public void dispatch(Message message, TelegramLongPollingBot bot) {
+    public void dispatch(Message message, Long bot_id) {
 
-        this.bot = bot;
 
 
         String text = message.getText();
         for(CommandHandler handler : handlers) {
             if(handler.support(text)) {
-                handler.handle(message, bot);
+                handler.handle(message, bot_id);
                 return;
             }
         }
@@ -93,7 +98,9 @@ public class CommandDispatcher {
 
                 }
 
-                executeMessage(msg);
+                AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+                executeMessage(msg, sender);
             });
             return;
 
@@ -105,8 +112,9 @@ public class CommandDispatcher {
 
 
         SendMessage fallback = new SendMessage(message.getChatId().toString(), "Что-то явно пошло не так, таких команд не знаю\uD83D\uDE05");
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         try{
-            Message sm = bot.execute(fallback);
+            Message sm = sender.execute(fallback);
             messageRegistry.addMessage(sm.getChatId(), sm.getMessageId());
         }
         catch(TelegramApiException e) {
@@ -241,9 +249,9 @@ public class CommandDispatcher {
         return markup;
     }
 
-    private void executeMessage(SendMessage message){
+    private void executeMessage(SendMessage message, AbsSender sender){
         try {
-            bot.execute(message);
+            sender.execute(message);
         } catch (TelegramApiException e) {
 
         }

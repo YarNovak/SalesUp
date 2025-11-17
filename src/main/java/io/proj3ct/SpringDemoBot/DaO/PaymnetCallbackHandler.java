@@ -2,6 +2,7 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.DB_entities.Bot;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -25,8 +27,6 @@ import java.util.stream.Collectors;
 @Component
 public class PaymnetCallbackHandler implements CallbackHandler {
 
-
-    TelegramLongPollingBot bot;
 
     @Autowired
     private CartItemRepository cartItemRepository;
@@ -51,6 +51,8 @@ public class PaymnetCallbackHandler implements CallbackHandler {
 
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
 
     @Override
     public boolean support(String callbackData) {
@@ -58,14 +60,15 @@ public class PaymnetCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
-        messageRegistry.deleteMessagesBefore(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
+        messageRegistry.deleteMessagesBefore(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, sender);
 
 
         System.out.println("fuck");
-        this.bot = bot;
         Long chatId = query.getMessage().getChatId();
         int messageId = query.getMessage().getMessageId();
 
@@ -93,23 +96,16 @@ public class PaymnetCallbackHandler implements CallbackHandler {
 
         //    executeMessage(sendMessage);
 
-            sendWhatever.sendhere_message(bot, chatId, "clearing",  markupInLine, null);
+            sendWhatever.sendhere_message(sender, chatId, "clearing",  markupInLine, null);
 
 
 
         }
         else{
             create_order(chatId);
-            send_pay(chatId, messageId);
+            send_pay(chatId, messageId, bot_id);
         }
 
-    }
-    private void executeMessage(SendMessage message){
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-
-        }
     }
 
     private void create_order(Long chatId) {
@@ -177,7 +173,7 @@ public class PaymnetCallbackHandler implements CallbackHandler {
         //else if(orderRepository.findByUser_ChatIdAndPaidEquals(userRepository.findByChatId(chatId).get().getChatId(), true).isPresent()) {}
 
     }
-    public void send_pay(long chatId, int messageId){
+    public void send_pay(long chatId, int messageId, Long bot_id){
 
         EditMessageText message = new EditMessageText();
         message.setChatId(String.valueOf(chatId));
@@ -216,9 +212,9 @@ public class PaymnetCallbackHandler implements CallbackHandler {
             return;
         }
 
-
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         try {
-            bot.execute(message);
+            sender.execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

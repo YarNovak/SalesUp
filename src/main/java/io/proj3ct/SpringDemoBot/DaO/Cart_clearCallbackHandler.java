@@ -1,6 +1,7 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
@@ -8,6 +9,7 @@ import io.proj3ct.SpringDemoBot.model.CartService;
 import io.proj3ct.SpringDemoBot.model.OrderService;
 import io.proj3ct.SpringDemoBot.model.Orders;
 import io.proj3ct.SpringDemoBot.model.OrdersRepository;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -16,6 +18,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -34,7 +37,6 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
     @Autowired
             private OrderService orderService;
 
-    TelegramLongPollingBot bot;
 
     @Autowired
     private BotConfig config;
@@ -45,6 +47,10 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
     private ButtonText buttonText;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -52,11 +58,10 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
 
-        this.bot = bot;
         Long chatId = query.getMessage().getChatId();
         int messageId = query.getMessage().getMessageId();
 
@@ -88,7 +93,9 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
 
         editMessage.setMessageId(Math.toIntExact(messageId));
 
-        sendWhatever.edithere_emptycart(bot, chatId, messageId, "clearing", markupInLine, null);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        sendWhatever.edithere_emptycart(sender, chatId, messageId, "clearing", markupInLine, null);
 
 
 /*

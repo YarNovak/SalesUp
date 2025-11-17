@@ -3,6 +3,7 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.MessagesInf;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
@@ -19,6 +20,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -33,10 +35,7 @@ public class StartCommandHandler implements CommandHandler {
     @Autowired
     private ButtonText buttonText;
 
-    TelegramLongPollingBot bot;
 
-    @Autowired
-    BotConfig botConfig;
 
     @Autowired
     BotRepository botRepository;
@@ -49,6 +48,8 @@ public class StartCommandHandler implements CommandHandler {
 
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
 
     @Override
     public boolean support(String command) {
@@ -57,25 +58,26 @@ public class StartCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(Message message, TelegramLongPollingBot bot) {
+    public void handle(Message message, Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(message.getChatId(), message.getMessageId(), false, bot);
-        messageRegistry.deleteMessagesBefore(message.getChatId(), message.getMessageId(), false, bot);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+        messageRegistry.deleteMessagesAfter(message.getChatId(), message.getMessageId(), false, bot_id);
+        messageRegistry.deleteMessagesBefore(message.getChatId(), message.getMessageId(), false, sender);
 
 
         System.out.println("holaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
-        registerUser(message);
-        this.bot = bot;
-        startCommandReceived(message.getChatId(), message.getChat().getFirstName());
+        registerUser(message, bot_id);
+        startCommandReceived(message.getChatId(), message.getChat().getFirstName(), bot_id);
 
 
 
     }
 
-    private void registerUser(Message msg) {
+    private void registerUser(Message msg, Long bot_id) {
 
-        if(userRepository.findByChatIdAndBot_Id(msg.getChatId(), Long.valueOf(botConfig.getBoit())).isEmpty()){
+        if(userRepository.findByChatIdAndBot_Id(msg.getChatId(), bot_id).isEmpty()){
 
             var chatId = msg.getChatId();
             var chat = msg.getChat();
@@ -87,13 +89,13 @@ public class StartCommandHandler implements CommandHandler {
             user.setLastName(chat.getLastName());
             user.setUserName(chat.getUserName());
             user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
-            user.setBot(botRepository.findById(Long.valueOf(botConfig.getBoit())).get());
+            user.setBot(botRepository.findById(bot_id).get());
 
             userRepository.save(user);
 
         }
     }
-    private void startCommandReceived(long chatId, String name) {
+    private void startCommandReceived(long chatId, String name, Long bot_id) {
 
         Map<String, String> my_messages = new HashMap<>();
 
@@ -103,10 +105,10 @@ public class StartCommandHandler implements CommandHandler {
 
         answer = messagesInf.getMessageText("greeting");
 
-        sendMessage(chatId, answer);
+        sendMessage(chatId, answer, bot_id);
 
     }
-    private void sendMessage(long chatId, String textToSend) {
+    private void sendMessage(long chatId, String textToSend, Long bot_id) {
 /*
         SendMessage message = new SendMessage();
 
@@ -162,19 +164,13 @@ public class StartCommandHandler implements CommandHandler {
         executeMessage(message);
 
  */
-
-        sendWhatever.sendhere_message(bot, chatId, "greeting", null,  keyboardMarkup);
-        katalog_all(chatId);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(sender, chatId, "greeting", null,  keyboardMarkup);
+        katalog_all(chatId, bot_id);
 
     }
-    private void executeMessage(SendMessage message) {
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-    private void katalog_all(long chatId) {
+
+    private void katalog_all(long chatId, Long bot_id) {
 /*
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -217,7 +213,8 @@ public class StartCommandHandler implements CommandHandler {
 
         //executeMessage(message);
 
-        sendWhatever.sendhere_message(bot, chatId, "menu", markupInLine,  null );
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(sender, chatId, "menu", markupInLine,  null );
         System.out.println("(((");
     }
 

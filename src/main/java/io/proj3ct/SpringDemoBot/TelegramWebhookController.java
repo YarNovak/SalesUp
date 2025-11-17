@@ -1,5 +1,7 @@
 package io.proj3ct.SpringDemoBot;
 
+import io.proj3ct.SpringDemoBot.DB_entities.Bot;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,17 +18,23 @@ public class TelegramWebhookController {
     private static final Logger log = LoggerFactory.getLogger(TelegramWebhookController.class);
 
     @Autowired
-    private final TenantService tenantService;
+    private TenantService tenantService;
 
     @Autowired
-    private final UpdateProcessingService updateProcessingService;
+    private BotRepository botRepository;
+
+    @Autowired
+    private UpdateProcessingService updateProcessingService;
 
     // Внедряем наши сервисы
-    public TelegramWebhookController(TenantService tenantService, UpdateProcessingService updateProcessingService) {
+    /*
+    public TelegramWebhookController(TenantService tenantService, UpdateProcessingService updateProcessingService, BotRepository botRepository) {
         System.out.println("SUKA");
         this.tenantService = tenantService;
+        this.botRepository = botRepository;
         this.updateProcessingService = updateProcessingService;
     }
+     */
 
     /**
      * Это - ЕДИНСТВЕННАЯ точка входа для ВСЕХ ботов.
@@ -41,10 +49,12 @@ public class TelegramWebhookController {
 
         log.info("Получено обновление для тенанта: {}", botIdentifier);
         System.out.println("SUKA2");
-        // 1. Найти, какому боту (тенанту) пришло обновление
-        TenantConfig config = tenantService.findConfigById(botIdentifier);
+        System.out.println(botIdentifier);// + " " + botRepository.findById(Long.parseLong(botIdentifier)).orElse(null).getBotToken());
 
-        if (config == null) {
+        // 1. Найти, какому боту (тенанту) пришло обновление
+        Bot bot = botRepository.findById(Long.parseLong(botIdentifier)).orElse(null);
+
+        if (bot == null) {
             // Если мы не знаем такого тенанта, логируем и игнорируем
             log.warn("Получен запрос для неизвестного тенанта: {}", botIdentifier);
             // Важно вернуть 200 OK, чтобы Telegram не пытался отправить апдейт снова
@@ -53,7 +63,7 @@ public class TelegramWebhookController {
 
         // 2. Передать обновление на АСИНХРОННУЮ обработку
         // Контроллер немедленно вернет 200 OK, а логика выполнится в другом потоке
-        updateProcessingService.process(config, update);
+        updateProcessingService.process(bot, update);
 
         // 3. Немедленно ответить Telegram 200 OK.
         return ResponseEntity.ok().build();

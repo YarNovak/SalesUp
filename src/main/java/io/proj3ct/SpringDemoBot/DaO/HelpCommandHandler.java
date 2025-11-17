@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Component
 public class HelpCommandHandler implements CommandHandler {
 
-    TelegramLongPollingBot bot;
 
     @Override
     public boolean support(String command) {
@@ -18,9 +17,8 @@ public class HelpCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(Message message, TelegramLongPollingBot bot) {
+    public void handle(Message message, Long bot_id) {
 
-        this.bot = bot;
         prepareAndSendMessage(message.getChatId(), "Ella Spot была создана чтобы упростить и ускорить процес покупки выдающегося \n" +
                 "товара SPOT.LAB\uD83D\uDE2E\u200D\uD83D\uDCA8\n" +
                 "\n" +
@@ -39,14 +37,6 @@ public class HelpCommandHandler implements CommandHandler {
 
 
     }
-    private void executeMessage(SendMessage message){
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-
-        }
-    }
-
 
 
 }

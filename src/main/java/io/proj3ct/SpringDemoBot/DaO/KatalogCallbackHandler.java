@@ -1,9 +1,11 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -32,15 +35,16 @@ public class KatalogCallbackHandler implements CallbackHandler {
     @Autowired
             private OrderService orderService;
 
-    TelegramLongPollingBot bot;
 
-    @Autowired
-    private BotConfig config;
 
     @Autowired
     private SendWhatever sendWhatever;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
 
     @Override
@@ -49,21 +53,19 @@ public class KatalogCallbackHandler implements CallbackHandler {
     }
 
     @Override
-    public void handle(CallbackQuery query, TelegramLongPollingBot bot) {
+    public void handle(CallbackQuery query, Long bot_id) {
 
-        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot);
+        messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
 
-
-        this.bot = bot;
-        if(sendcart_nope(query.getMessage().getChatId())) return;
-        send_compony_repository(query.getMessage().getChatId());
+        if(sendcart_nope(query.getMessage().getChatId(), bot_id)) return;
+        send_compony_repository(query.getMessage().getChatId(), bot_id);
 
 
     }
 
 
 
-    private void send_compony_repository(long chatId) {
+    private void send_compony_repository(long chatId, Long bot_id) {
 
        SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
@@ -79,7 +81,7 @@ public class KatalogCallbackHandler implements CallbackHandler {
 
 
         long k = 0;
-        List<Vapecompony> vcr = StreamSupport.stream(vapecomponyRepository.findAllByBot_Id(Long.valueOf(config.getBoit())).spliterator(), false)
+        List<Vapecompony> vcr = StreamSupport.stream(vapecomponyRepository.findAllByBot_Id(bot_id).spliterator(), false)
                 .collect(Collectors.toList());
 
         while(vcr.size()>0){
@@ -103,19 +105,13 @@ public class KatalogCallbackHandler implements CallbackHandler {
         message.setReplyMarkup(markupInLine);
 
         // executeMessage(message);
-
-        sendWhatever.sendhere_message(bot, chatId, "catalog",  markupInLine, null);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(sender, chatId, "catalog",  markupInLine, null);
 
     }
 
-    private void executeMessage(SendMessage message) {
-        try {
-            bot.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-    private boolean sendcart_nope(Long chatId){
+
+    private boolean sendcart_nope(Long chatId, Long bot_id){
 /*
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
@@ -129,7 +125,7 @@ public class KatalogCallbackHandler implements CallbackHandler {
 
 
  */
-        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");

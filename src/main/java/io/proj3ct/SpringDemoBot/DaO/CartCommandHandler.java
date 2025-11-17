@@ -1,10 +1,12 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -12,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -42,9 +45,13 @@ public class CartCommandHandler implements CommandHandler {
     @Autowired
             private OrderService orderService;
 
-    TelegramLongPollingBot bot;
+
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String command) {
@@ -52,11 +59,11 @@ public class CartCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(Message message, TelegramLongPollingBot bot) {
+    public void handle(Message message, Long bot_id) {
 
-        this.bot = bot;
+
         if(sendcart_nope(message.getChatId())) return;
-        getCartView(message.getChatId());
+        getCartView(message.getChatId(), bot_id);
 
     }
 
@@ -86,7 +93,7 @@ public class CartCommandHandler implements CommandHandler {
         //  return true;
         return  false;
     }
-    private void getCartView(long chatId) {
+    private void getCartView(long chatId, Long bot_id) {
 
         InlineKeyboardMarkup markupInLine = new InlineKeyboardMarkup();
         SendMessage message = new SendMessage();
@@ -114,7 +121,10 @@ public class CartCommandHandler implements CommandHandler {
             markupInLine.setKeyboard(rowsInLine);
             message.setReplyMarkup(markupInLine);
 
-            sendWhatever.sendhere_message(bot, chatId, "clearing", markupInLine, null);
+
+            AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+
+            sendWhatever.sendhere_message(sender, chatId, "clearing", markupInLine, null);
 
 
 
@@ -174,7 +184,7 @@ public class CartCommandHandler implements CommandHandler {
             message.setReplyMarkup(markup);
 
 
-            executeMessage(message);
+            executeMessage(message, bot_id);
 
 
 
@@ -183,10 +193,11 @@ public class CartCommandHandler implements CommandHandler {
 
 
     }
-    private void executeMessage(SendMessage message){
+    private void executeMessage(SendMessage message, Long bot_id) {
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         try {
 
-           Message m =  bot.execute(message);
+           Message m = sender.execute(message);
 
             messageRegistry.addMessage(m.getChatId(), m.getMessageId());
         } catch (TelegramApiException e) {
