@@ -10,24 +10,21 @@ import java.util.Map;
 @Component
 public class Wait_photo {
 
-    @Autowired
-    private BotConfig config;
-
     private final Map<Person, Boolean> wait_photo = new HashMap<>();
 
     public void clear() {
         wait_photo.clear();
     }
 
-    public boolean getOrDefault(Long chatId, boolean f) {
-        return wait_photo.getOrDefault(new Person(chatId, Long.valueOf(config.getBoit())), false);
+    public boolean getOrDefault(Long chatId, boolean f, Long bot_id) {
+        return wait_photo.getOrDefault(new Person(chatId, bot_id), false);
     }
 
-    public void put(Long chatId, boolean f) {
-        wait_photo.put(new Person(chatId, Long.valueOf(config.getBoit())), true);
+    public void put(Long chatId, boolean f, Long bot_id) {
+        wait_photo.put(new Person(chatId, bot_id), true);
     }
 
-    public void remove(Long chatId) {
-        wait_photo.remove(new Person(chatId, Long.valueOf(config.getBoit())));
+    public void remove(Long chatId, Long bot_id) {
+        wait_photo.remove(new Person(chatId, bot_id));
     }
 }

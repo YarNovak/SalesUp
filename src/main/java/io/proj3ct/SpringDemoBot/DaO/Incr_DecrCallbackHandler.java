@@ -115,7 +115,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
             if(editMessage.getText().isEmpty()){
 
-                sendWhatever.edithere_emptycart(sender, chatId, messageId, "clearing", sendCarteditor_KB(chatId, bot_id), null);
+                sendWhatever.edithere_emptycart(sender, chatId, messageId, "clearing", sendCarteditor_KB(chatId, bot_id), null, bot_id);
 
                 return;
             }
@@ -138,7 +138,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
             AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
             SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
             sendMessage.setParseMode("MarkdownV2");
-            sendWhatever.sendhere_message(sender, chatId, "please_whait", null, null);
+            sendWhatever.sendhere_message(bot_id,sender, chatId, "please_whait", null, null);
             return true;
         }
         return  false;
@@ -156,7 +156,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
             sb.append(escapeMarkdown(""));
             return sb.toString();
         }
-        sb.append(escapeMarkdown(buttonText.getTexts().get("cart")+":\n\n"));
+        sb.append(escapeMarkdown(buttonText.getTexts(bot_id).get("cart")+":\n\n"));
         double total = 0.0;
 
         for(CartItem item : items){
@@ -171,7 +171,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
                     .append(escapeMarkdown("  ×  "))
                     .append(escapeMarkdown(String.valueOf(quantity)))
                     .append(escapeMarkdown(" → "))
-                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts().get("curr"))).append("__")
+                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts(bot_id).get("curr"))).append("__")
                     .append(escapeMarkdown("💰\n"));
 
             total += price;
@@ -181,7 +181,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
         }
 
-        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts().get("curr")).append("__*");
+        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts(bot_id).get("curr")).append("__*");
     /*
         sb.append("\n\n\n" +
                 "❗\uFE0FВНИМАНИЕ❗\uFE0F\n" +
@@ -212,7 +212,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
             List<InlineKeyboardButton> rowInLine = new ArrayList<>();
             var allk = new InlineKeyboardButton();
 
-            allk.setText(buttonText.getTexts().get("catalog"));
+            allk.setText(buttonText.getTexts(bot_id).get("catalog"));
             allk.setCallbackData("ALL_KATALOG_BUTTON");
 
             rowInLine.add(allk);
@@ -231,7 +231,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
             List<InlineKeyboardButton> row = new ArrayList<>();
 
-            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("delete"));
+            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("delete"));
             Button.setCallbackData("decr_" + item.getId());
 
             row.add(Button);
@@ -241,7 +241,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
 
             row.add(Button);
 
-            Button = new InlineKeyboardButton(buttonText.getTexts().get("add"));
+            Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("add"));
             Button.setCallbackData("incr_" + item.getId());
 
 
@@ -253,7 +253,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
         List<InlineKeyboardButton> row = new ArrayList<>();
 
 
-        InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("cart"));
+        InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("cart"));
         Button.setCallbackData("SEE_CART");
 
         row.add(Button);

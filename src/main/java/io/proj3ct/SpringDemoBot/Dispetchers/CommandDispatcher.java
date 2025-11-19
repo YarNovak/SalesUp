@@ -1,5 +1,6 @@
 package io.proj3ct.SpringDemoBot.Dispetchers;
 
+import io.proj3ct.SpringDemoBot.DaO.ButtonsMapHandler;
 import io.proj3ct.SpringDemoBot.DaO.CommandHandler;
 import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
@@ -30,6 +31,9 @@ public class CommandDispatcher {
     private List<CommandHandler> handlers;
 
     @Autowired
+    private List<ButtonsMapHandler> buttonshandlers;
+
+    @Autowired
     VapecomponyKatalogRepository vapecomponyKatalogRepository;
 
     @Autowired
@@ -50,8 +54,17 @@ public class CommandDispatcher {
         String text = message.getText();
         for(CommandHandler handler : handlers) {
             System.out.println("asdasdasd1");
+
             if(handler.support(text)) {
                 System.out.println("asdasdasd2");
+                handler.handle(message, bot_id);
+                return;
+            }
+        }
+        for(ButtonsMapHandler handler : buttonshandlers) {
+            System.out.println("asdasdasd3");
+            if(handler.support(text, bot_id)){
+                System.out.println("asdasdasd4");
                 handler.handle(message, bot_id);
                 return;
             }

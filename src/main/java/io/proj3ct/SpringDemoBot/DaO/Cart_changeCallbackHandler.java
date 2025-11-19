@@ -66,7 +66,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
             SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             return true;
         }
         return  false;
@@ -77,7 +77,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            //  sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
             orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
         }
@@ -108,7 +108,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
             List<InlineKeyboardButton> rowInLine = new ArrayList<>();
             var allk = new InlineKeyboardButton();
 
-            allk.setText(buttonText.getTexts().get("catalog")); //"\uD83E\uDDEAКаталог"
+            allk.setText(buttonText.getTexts(bot_id).get("catalog")); //"\uD83E\uDDEAКаталог"
             allk.setCallbackData("ALL_KATALOG_BUTTON");
 
             rowInLine.add(allk);
@@ -118,11 +118,11 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
             message.setReplyMarkup(markupInLine);
 
             AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-            sendWhatever.sendhere_message(sender, chatId, "clearing",  markupInLine, null);
+            sendWhatever.sendhere_message(bot_id, sender, chatId, "clearing",  markupInLine, null);
 
         }
         else{
-            StringBuilder sb = new StringBuilder( escapeMarkdown(buttonText.getTexts().get("cart") +":\n\n") );
+            StringBuilder sb = new StringBuilder( escapeMarkdown(buttonText.getTexts(bot_id).get("cart") +":\n\n") );
             double total = 0.0;
 
             for(CartItem item : items){
@@ -137,14 +137,14 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
                         .append(escapeMarkdown("  ×  "))
                         .append(escapeMarkdown(String.valueOf(quantity)))
                         .append(escapeMarkdown(" → "))
-                        .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts().get("curr"))).append("__")
+                        .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts(bot_id).get("curr"))).append("__")
                         .append(escapeMarkdown("💰\n"));
 
                 total += price;
 
                 List<InlineKeyboardButton> row = new ArrayList<>();
 
-                InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("delete"));
+                InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("delete"));
                 Button.setCallbackData("decr_" + item.getId());
 
                 row.add(Button);
@@ -154,7 +154,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
 
                 row.add(Button);
 
-                Button = new InlineKeyboardButton(buttonText.getTexts().get("add"));
+                Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("add"));
                 Button.setCallbackData("incr_" + item.getId());
 
 
@@ -163,7 +163,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
 
             }
 
-            sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts().get("curr")).append("__*");
+            sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts(bot_id).get("curr")).append("__*");
             if(total<100) {
 
 
@@ -175,7 +175,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
 
-            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("cart")); //"\uD83D\uDED2 Корзина"
+            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("cart")); //"\uD83D\uDED2 Корзина"
             Button.setCallbackData("SEE_CART");
 
             row.add(Button);

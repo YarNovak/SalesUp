@@ -17,7 +17,7 @@
 
 
 
-        buttonText.getTexts().get("cart"))
+        buttonText.getTexts(bot_id).get("cart"))
         messagesInf.getMessageText("greeting");
 
 

@@ -159,7 +159,7 @@ public class CallbackDispatcher {
                     //msg.setReplyMarkup(generateProductButtons(l));
                     System.out.println("kakashki)");
 
-                    sendWhatever.sendhere_firstAdd(bot_id, query.getMessage().getChatId(), product.getId(), generateProductButtons(l), null );
+                    sendWhatever.sendhere_firstAdd(bot_id, query.getMessage().getChatId(), product.getId(), generateProductButtons(l, bot_id), null );
 
                 }
 
@@ -216,7 +216,7 @@ public class CallbackDispatcher {
 
 
         }
-        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append("zl").append("__*");
+        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append("zl").append("__*");
 
         // if(total<100) {
 
@@ -250,7 +250,7 @@ public class CallbackDispatcher {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
 
-            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("delete"));
+            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("delete"));
             Button.setCallbackData("decr2_" + item.getId());
 
             row.add(Button);
@@ -260,7 +260,7 @@ public class CallbackDispatcher {
 
             row.add(Button);
 
-            Button = new InlineKeyboardButton(buttonText.getTexts().get("add"));
+            Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("add"));
             Button.setCallbackData("incr2_" + item.getId());
 
 
@@ -272,7 +272,7 @@ public class CallbackDispatcher {
         List<InlineKeyboardButton> row = new ArrayList<>();
 
 
-        InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("cart"));
+        InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("cart"));
         Button.setCallbackData("SEE_CART");
 
         row.add(Button);
@@ -284,7 +284,7 @@ public class CallbackDispatcher {
         return markup;
     }
 
-    public InlineKeyboardMarkup generateProductButtons(List<Vapecompony_katalog> products) {
+    public InlineKeyboardMarkup generateProductButtons(List<Vapecompony_katalog> products, long bot_id) {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         System.out.println("NU PIZDA(");
         System.out.println(products.size());
@@ -295,10 +295,10 @@ public class CallbackDispatcher {
 
             InlineKeyboardButton button = new InlineKeyboardButton();
             if (product.getKilkist() > 0) {
-                button.setText(buttonText.getTexts().get("first_add"));
+                button.setText(buttonText.getTexts(bot_id).get("first_add"));
                 button.setCallbackData("add_to_cart:" + product.getId());
             } else {
-                button.setText(buttonText.getTexts().get("empty_add"));
+                button.setText(buttonText.getTexts(bot_id).get("empty_add"));
                 button.setCallbackData("out_of_stock");
             }
 

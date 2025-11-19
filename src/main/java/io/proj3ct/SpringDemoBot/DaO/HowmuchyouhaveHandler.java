@@ -59,13 +59,13 @@ public class HowmuchyouhaveHandler {
             or.setBot(botRepository.findById(bot_id).get());
             orderRepository.save(or);
             //wait_howmuchyouhave.remove(chatId);
-            send_id(chatId, sender);
+            send_id(chatId, sender, bot_id);
             return;
         }
 
 
     }
-    public void send_id(Long chatId, AbsSender sender) {
+    public void send_id(Long chatId, AbsSender sender, Long bot_id) {
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
@@ -98,7 +98,7 @@ public class HowmuchyouhaveHandler {
         message.setReplyMarkup(keyboardMarkup);
 
         try {
-            wait_id.put(chatId, true);
+            wait_id.put(chatId, true, bot_id);
             sender.execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);

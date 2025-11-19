@@ -17,7 +17,7 @@ public class MessagesInf {
 
     private String messageKey;
 
-    Map<String, Information> my_messages = new HashMap<>();
+    Map<Long, Map<String, Information>> my_messages = new HashMap<>();
 
     @Setter
     @Getter
@@ -53,15 +53,28 @@ public class MessagesInf {
 
     }
 
-    public String getMessageText(String key){
+   public Information getMy_messages(Long bot_id, String messageKey){
+
+        return my_messages.get(bot_id).get(messageKey);
+
+   }
+
+   public void setMessagesForId(Long bot_id, Map<String, Information> messages) {
+
+        this.my_messages.put(bot_id, messages);
+   }
+
+    public String getMessageText(Long bot_id, String key){
 
 
-        return my_messages.get(key).getText();
+        return this.my_messages.get(bot_id).get(key).getText();
+                //this.my_messages.get(key).getText();
 
     }
 
-    public String getMessageEntity(String key){
-        return my_messages.get(key).getEntitiesJson();
+    public String getMessageEntity(Long bot_id, String key){
+        return this.my_messages.get(bot_id).get(key).getText();
+        //return my_messages.get(key).getEntitiesJson();
     }
 
 

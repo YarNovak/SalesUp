@@ -10,24 +10,21 @@ import java.util.Map;
 @Component
 public class Adres {
 
-    @Autowired
-    private BotConfig config;
-
     private final Map<Person, String> adres = new HashMap<>();
 
     public void clear() {
         adres.clear();
     }
 
-    public String get(Long chatId) {
-        return adres.get(new Person(chatId, Long.valueOf(config.getBoit())));
+    public String get(Long chatId, Long bot_id) {
+        return adres.get(new Person(chatId, bot_id));
     }
 
-    public void put(Long chatId, String adresa) {
-        adres.put(new Person(chatId, Long.valueOf(config.getBoit())), adresa);
+    public void put(Long chatId, String adresa, Long bot_id) {
+        adres.put(new Person(chatId, bot_id), adresa);
     }
 
-    public void remove(Long chatId) {
-        adres.remove(new Person(chatId, Long.valueOf(config.getBoit())));
+    public void remove(Long chatId, Long bot_id) {
+        adres.remove(new Person(chatId, bot_id));
     }
 }

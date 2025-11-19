@@ -62,8 +62,8 @@ public class PhotoHandler {
 
         Long chatId = update.getMessage().getChatId();
 
-        Contact contact =  media.get(chatId);
-        media.remove(chatId);
+        Contact contact =  media.get(chatId, bot_id);
+        media.remove(chatId, bot_id);
         SendContact sendContact = new SendContact();
         sendContact.setChatId(botRepository.findById(Long.valueOf(config.getBoit())).get().getOwner().getTelegramId().toString());
         sendContact.setFirstName(contact.getFirstName());
@@ -86,7 +86,7 @@ public class PhotoHandler {
         photo2.setChatId(botRepository.findById(Long.valueOf(config.getBoit())).get().getOwner().getTelegramId().toString());
 
         photo2.setPhoto(new InputFile(fileId));
-        photo2.setCaption(escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId) + buttonText.getTexts().get("curr") + " с помощью онлайн метода оплаты\n\n") + sendCarteditor_Text(chatId)+ escapeMarkdown("\n\n"+"Адрес: "+adres.get(chatId)));
+        photo2.setCaption(escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId) + buttonText.getTexts(bot_id).get("curr") + " с помощью онлайн метода оплаты\n\n") + sendCarteditor_Text(chatId, bot_id)+ escapeMarkdown("\n\n"+"Адрес: "+adres.get(chatId, bot_id)));
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
@@ -105,7 +105,7 @@ public class PhotoHandler {
         photo2.setReplyMarkup(markup);
 
         photo2.setReplyMarkup(markup);
-        adres.remove(chatId);
+        adres.remove(chatId, bot_id);
 
         orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId(), chatId);
 
@@ -128,7 +128,7 @@ public class PhotoHandler {
 
              */
 
-            sendWhatever.sendhere_message(bot, chatId, "congrat",  null, null);
+            sendWhatever.sendhere_message(bot_id,bot, chatId, "congrat",  null, null);
 
 
             User us = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get();
@@ -146,7 +146,7 @@ public class PhotoHandler {
         // sendText(config.getOwnerId(), "ehh");
 
     }
-    private String sendCarteditor_Text(Long chatId){
+    private String sendCarteditor_Text(Long chatId, Long bot_id){
 
 
 
@@ -156,7 +156,7 @@ public class PhotoHandler {
             sb.append(escapeMarkdown(""));
             return sb.toString();
         }
-        sb.append(escapeMarkdown(buttonText.getTexts().get("cart")+":\n\n"));
+        sb.append(escapeMarkdown(buttonText.getTexts(bot_id).get("cart")+":\n\n"));
         double total = 0.0;
 
         for(CartItem item : items){
@@ -171,7 +171,7 @@ public class PhotoHandler {
                     .append(escapeMarkdown("  ×  "))
                     .append(escapeMarkdown(String.valueOf(quantity)))
                     .append(escapeMarkdown(" → "))
-                    .append("*__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts().get("curr"))).append("__*")
+                    .append("*__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts(bot_id).get("curr"))).append("__*")
                     .append(escapeMarkdown("💰\n"));
 
             total += price;
@@ -181,7 +181,7 @@ public class PhotoHandler {
 
         }
 
-        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts().get("curr")).append("__*");
+        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts(bot_id).get("curr")).append("__*");
     /*
         sb.append("\n\n\n" +
                 "❗\uFE0FВНИМАНИЕ❗\uFE0F\n" +

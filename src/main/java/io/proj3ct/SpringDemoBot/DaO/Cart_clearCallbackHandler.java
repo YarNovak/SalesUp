@@ -76,7 +76,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         var allk = new InlineKeyboardButton();
 
-        allk.setText(buttonText.getTexts().get("catalog"));
+        allk.setText(buttonText.getTexts(bot_id).get("catalog"));
         allk.setCallbackData("ALL_KATALOG_BUTTON");
 
 
@@ -91,7 +91,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
 
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
 
-        sendWhatever.edithere_emptycart(sender, chatId, messageId, "clearing", markupInLine, null);
+        sendWhatever.edithere_emptycart(sender, chatId, messageId, "clearing", markupInLine, null, bot_id);
 
 
 /*
@@ -112,7 +112,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
 
             SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
             sendMessage.setParseMode("HTML");
-            sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             return true;
         }
         return  false;
@@ -122,7 +122,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            //  sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
             orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
         }

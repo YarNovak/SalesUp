@@ -9,6 +9,7 @@ import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.Vapecompony;
 import io.proj3ct.SpringDemoBot.model.VapecomponyKatalogRepository;
 import io.proj3ct.SpringDemoBot.model.VapecomponyRepository;
+import io.proj3ct.SpringDemoBot.repository.BotMessageRepository;
 import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import io.proj3ct.SpringDemoBot.service.VapecomponyService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class KatalogCommandHandler implements CommandHandler {
+public class KatalogCommandHandler implements ButtonsMapHandler {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -74,8 +75,8 @@ public class KatalogCommandHandler implements CommandHandler {
 
 
     @Override
-    public boolean support(String command) {
-      return buttonText.getTexts().get("catalog").equals(command);
+    public boolean support(String command, Long bot_id) {
+      return buttonText.getTexts(bot_id).get("catalog").equals(command);
     }
 
 
@@ -130,7 +131,7 @@ public class KatalogCommandHandler implements CommandHandler {
 
         //executeMessage(message);
         AbsSender sender =tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-        sendWhatever.sendhere_message(sender, chatId, "catalog",  markupInLine, null);
+        sendWhatever.sendhere_message(bot_id,sender, chatId, "catalog",  markupInLine, null);
 
 
 

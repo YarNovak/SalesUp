@@ -21,8 +21,7 @@ public class CacheDev {
 
     @Autowired
     private final BotRepository botRepository;
-    @Autowired
-    private final BotConfig botConfig;
+
     @Autowired
     private final ButtonText buttonText;
     @Autowired
@@ -35,53 +34,51 @@ public class CacheDev {
 
         List<Bot> bots = botRepository.findAll();
 
+        for(Bot bot : bots) {
+
+            Map<String, String> buttons = botRepository.findById(bot.getId()).get().getButtonTexts();
+            buttonText.setTexts(bot.getId(), buttons);
+            System.out.println(buttonText.getTexts(bot.getId()));
+
+        }
 
 
-        Map<String, String> buttons = botRepository.findById(Long.valueOf(botConfig.getBoit())).get().getButtonTexts();
-        buttonText.setTexts(buttons);
-        System.out.println(buttonText.getTexts());
+
+
 
     }
 
     public void initMessages() {
 
-        Map<String, MessagesInf.Information> informationMap = new HashMap<>();
+        List<Bot> bots = botRepository.findAll();
+        for(Bot bot : bots) {
 
-        List<BotMessage> list_of_messages = botMessageRepository.findByBot_Id(Long.valueOf(botConfig.getBoit()));
-        for (BotMessage botMessage : list_of_messages) {
+            Map<String, MessagesInf.Information> informationMap = new HashMap<>();
+            List<BotMessage> list_of_messages = botMessageRepository.findByBot_Id(bot.getId());
 
-            informationMap.put(botMessage.getMessageKey(), new MessagesInf.Information(
+            for (BotMessage botMessage : list_of_messages) {
 
-                    botMessage.getPhoto(),
-                    botMessage.getPhotoMimeType(),
-                    botMessage.getVideo(),
-                    botMessage.getPhoto_updatedAt(),
-                    botMessage.getVideo_updatedAt(),
-                    botMessage.getVideoMimeType(),
-                    botMessage.getText(),
-                    botMessage.getEntitiesJson()
+                informationMap.put(botMessage.getMessageKey(), new MessagesInf.Information(
+
+                        botMessage.getPhoto(),
+                        botMessage.getPhotoMimeType(),
+                        botMessage.getVideo(),
+                        botMessage.getPhoto_updatedAt(),
+                        botMessage.getVideo_updatedAt(),
+                        botMessage.getVideoMimeType(),
+                        botMessage.getText(),
+                        botMessage.getEntitiesJson()
 
 
-            ));
+                ));
 
-            System.out.println(informationMap.get(botMessage.getMessageKey()).getText());
-            System.out.println("0000000000000000000000000");
+                System.out.println(informationMap.get(botMessage.getMessageKey()).getText());
+                System.out.println("0000000000000000000000000");
+
+            }
+
+            infa.setMessagesForId(bot.getId(), informationMap);
 
         }
-        System.out.println("POPA");
-        infa.setMy_messages(informationMap);
-
-        for (BotMessage botMessage : list_of_messages){
-
-            System.out.println(infa.getMy_messages().get(botMessage.getMessageKey()).getText());
-
-        }
-
-
-
     }
-
-
-
-
 }

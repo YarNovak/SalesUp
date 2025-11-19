@@ -54,30 +54,30 @@ public class SendWhatever {
     private BotRepository botRepository;
 
 
-    public void sendhere_message(AbsSender sender, Long chatId, String key, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup) {
+    public void sendhere_message(Long bot_id, AbsSender sender, Long chatId, String key, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup) {
 
             String type = "text";
 
-
-            if(messagesinf.getMy_messages().get(key).getPhoto()!=null) {type = "photo";}
-            else if(messagesinf.getMy_messages().get(key).getVideo()!=null) {type = "video";}
+            
+            if(messagesinf.getMy_messages(bot_id, key).getPhoto()!=null) {type = "photo";}
+            else if(messagesinf.getMy_messages(bot_id, key).getVideo()!=null) {type = "video";}
 
             if(type.equals("photo")) {
 
                 SendPhoto sendPhoto = new SendPhoto();
                 sendPhoto.setChatId(chatId.toString());
 
-                ByteArrayInputStream bais = new ByteArrayInputStream(messagesinf.getMy_messages().get(key).getPhoto());
+                ByteArrayInputStream bais = new ByteArrayInputStream(messagesinf.getMy_messages(bot_id, key).getPhoto());
                 InputFile inputFile = new InputFile(bais, "image.jpg");
                 sendPhoto.setPhoto(inputFile);
 
-                sendPhoto.setCaption(messagesinf.getMessageText(key));
+                sendPhoto.setCaption(messagesinf.getMessageText(bot_id, key));
 
-                if(messagesinf.getMessageEntity(key)!=null){
+                if(messagesinf.getMessageEntity(bot_id, key)!=null){
                     try {
                         ObjectMapper mapper2 = new ObjectMapper();
                         List<MessageEntity> entities = mapper2.readValue(
-                                messagesinf.getMessageEntity(key),
+                                messagesinf.getMessageEntity(bot_id, key),
                                 new TypeReference<List<MessageEntity>>() {}
                         );
                         sendPhoto.setCaptionEntities(entities);
@@ -111,17 +111,17 @@ public class SendWhatever {
                 SendVideo sendVideo = new SendVideo();
                 sendVideo.setChatId(chatId.toString());
 
-                ByteArrayInputStream bais = new ByteArrayInputStream(messagesinf.getMy_messages().get(key).getVideo());
+                ByteArrayInputStream bais = new ByteArrayInputStream(messagesinf.getMy_messages(bot_id, key).getVideo());
                 InputFile inputFile = new InputFile(bais, "video.mp4");
                 sendVideo.setVideo(inputFile);
 
-                sendVideo.setCaption(messagesinf.getMessageText(key));
+                sendVideo.setCaption(messagesinf.getMessageText(bot_id, key));
 
-                if(messagesinf.getMessageEntity(key)!=null){
+                if(messagesinf.getMessageEntity(bot_id, key)!=null){
                     try {
                         ObjectMapper mapper2 = new ObjectMapper();
                         List<MessageEntity> entities = mapper2.readValue(
-                                messagesinf.getMessageEntity(key),
+                                messagesinf.getMessageEntity(bot_id, key),
                                 new TypeReference<List<MessageEntity>>() {}
                         );
                         sendVideo.setCaptionEntities(entities);
@@ -155,13 +155,13 @@ public class SendWhatever {
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(chatId.toString());
 
-                sendMessage.setText(messagesinf.getMessageText(key));
+                sendMessage.setText(messagesinf.getMessageText(bot_id, key));
 
-                if(messagesinf.getMessageEntity(key)!=null){
+                if(messagesinf.getMessageEntity(bot_id, key)!=null){
                     try {
                         ObjectMapper mapper2 = new ObjectMapper();
                         List<MessageEntity> entities = mapper2.readValue(
-                                messagesinf.getMessageEntity(key),
+                                messagesinf.getMessageEntity(bot_id, key),
                                 new TypeReference<List<MessageEntity>>() {}
                         );
                         sendMessage.setEntities(entities);
@@ -653,13 +653,13 @@ public class SendWhatever {
             Integer messageId,
             String key,
             InlineKeyboardMarkup markupInLine,
-            ReplyKeyboardMarkup replyKeyboardMarkup) {
+            ReplyKeyboardMarkup replyKeyboardMarkup, Long bot_id) {
 
         String type = "text";
 
-        if (messagesinf.getMy_messages().get(key).getPhoto() != null) {
+        if (messagesinf.getMy_messages(bot_id, key).getPhoto() != null) {
             type = "photo";
-        } else if (messagesinf.getMy_messages().get(key).getVideo() != null) {
+        } else if (messagesinf.getMy_messages(bot_id, key).getVideo() != null) {
             type = "video";
         }
 
@@ -669,12 +669,12 @@ public class SendWhatever {
                 EditMessageText editText = new EditMessageText();
                 editText.setChatId(chatId.toString());
                 editText.setMessageId(messageId);
-                editText.setText(messagesinf.getMessageText(key));
+                editText.setText(messagesinf.getMessageText(bot_id, key));
 
-                if (messagesinf.getMessageEntity(key) != null) {
+                if (messagesinf.getMessageEntity(bot_id, key) != null) {
                     ObjectMapper mapper2 = new ObjectMapper();
                     List<MessageEntity> entities = mapper2.readValue(
-                            messagesinf.getMessageEntity(key),
+                            messagesinf.getMessageEntity(bot_id, key),
                             new TypeReference<List<MessageEntity>>() {}
                     );
                     editText.setEntities(entities);
@@ -691,7 +691,7 @@ public class SendWhatever {
             e.printStackTrace();
         }
     }
-
+/*
 
     public void edithere_paymentmessage(
             TelegramLongPollingBot bot,
@@ -699,13 +699,13 @@ public class SendWhatever {
             Integer messageId,
             String key,
             InlineKeyboardMarkup markupInLine,
-            ReplyKeyboardMarkup replyKeyboardMarkup) {
+            ReplyKeyboardMarkup replyKeyboardMarkup, Long bot_id) {
 
         String type = "text";
 
-        if (messagesinf.getMy_messages().get(key).getPhoto() != null) {
+        if (messagesinf.getMy_messages(bot_id, key).getPhoto() != null) {
             type = "photo";
-        } else if (messagesinf.getMy_messages().get(key).getVideo() != null) {
+        } else if (messagesinf.getMy_messages().get(bot_id, key) != null) {
             type = "video";
         }
 
@@ -715,12 +715,12 @@ public class SendWhatever {
             EditMessageText editText = new EditMessageText();
             editText.setChatId(chatId.toString());
             editText.setMessageId(messageId);
-            editText.setText(messagesinf.getMessageText(key));
+            editText.setText(messagesinf.getMessageText(bot_id, key));
 
-            if (messagesinf.getMessageEntity(key) != null) {
+            if (messagesinf.getMessageEntity(bot_id, key) != null) {
                 ObjectMapper mapper2 = new ObjectMapper();
                 List<MessageEntity> entities = mapper2.readValue(
-                        messagesinf.getMessageEntity(key),
+                        messagesinf.getMessageEntity(bot_id, key),
                         new TypeReference<List<MessageEntity>>() {}
                 );
                 editText.setEntities(entities);
@@ -738,7 +738,7 @@ public class SendWhatever {
         }
     }
 
-
+*/
 
 
 }

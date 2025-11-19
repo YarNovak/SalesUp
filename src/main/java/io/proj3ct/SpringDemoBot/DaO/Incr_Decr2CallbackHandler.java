@@ -98,7 +98,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 System.out.println("0000000000000000000000000000000000000000000000000000000");
                 editMessage.setText(cti.getVapecomponyKatalog().getName().replace("/", "").trim());
 
-                InlineKeyboardButton addToCartBtn = new InlineKeyboardButton(buttonText.getTexts().get("firs_add"));
+                InlineKeyboardButton addToCartBtn = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("firs_add"));
                 addToCartBtn.setCallbackData("add_to_cart:" + cti.getVapecomponyKatalog().getId()); //add_to_cart:
 
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -136,7 +136,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
                 editMessage.setText(cti.getVapecomponyKatalog().getName().replace("/", "").trim());
 
-                InlineKeyboardButton addToCartBtn = new InlineKeyboardButton(buttonText.getTexts().get("first_add"));
+                InlineKeyboardButton addToCartBtn = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("first_add"));
                 addToCartBtn.setCallbackData("add_to_cart:" + cti.getVapecomponyKatalog().getId()); //add_to_cart:
 
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -159,7 +159,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
             SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             return true;
         }
         return  false;
@@ -170,7 +170,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            //  sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
             orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
         }
@@ -207,7 +207,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                     .append(escapeMarkdown("  ×  "))
                     .append(escapeMarkdown(String.valueOf(quantity)))
                     .append(escapeMarkdown(" → "))
-                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts().get("curr"))).append("__")
+                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts(bot_id).get("curr"))).append("__")
                     .append(escapeMarkdown("💰\n"));
 
             total += price;
@@ -216,7 +216,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
 
         }
-        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts().get("curr")).append("__*");
+        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts(bot_id).get("curr")).append("__*");
 
         // if(total<100) {
 
@@ -248,7 +248,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
             List<InlineKeyboardButton> row = new ArrayList<>();
 
 
-            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("delete"));
+            InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("delete"));
             Button.setCallbackData("decr2_" + item.getId());
 
             row.add(Button);
@@ -258,7 +258,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
             row.add(Button);
 
-            Button = new InlineKeyboardButton(buttonText.getTexts().get("add"));
+            Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("add"));
             Button.setCallbackData("incr2_" + item.getId());
 
 
@@ -270,7 +270,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
         List<InlineKeyboardButton> row = new ArrayList<>();
 
 
-        InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts().get("cart"));
+        InlineKeyboardButton Button = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("cart"));
         Button.setCallbackData("SEE_CART");
 
         row.add(Button);

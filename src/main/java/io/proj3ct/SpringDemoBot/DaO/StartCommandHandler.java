@@ -103,7 +103,7 @@ public class StartCommandHandler implements CommandHandler {
 
         String answer = ("Приветик, " + name +", меня зовут Ella Spot.\uD83D\uDC4B\n");
 
-        answer = messagesInf.getMessageText("greeting");
+        answer = messagesInf.getMessageText(bot_id,"greeting");
 
         sendMessage(chatId, answer, bot_id);
 
@@ -142,13 +142,13 @@ public class StartCommandHandler implements CommandHandler {
 /*
         row.add("\uD83E\uDDEAКаталог");
         row.add("\uD83D\uDCB8Оплата");
-        row.add(buttonText.getTexts().get("cart"));
+        row.add(buttonText.getTexts(bot_id).get("cart"));
 
 
  */
-        row.add(buttonText.getTexts().get("catalog"));
-        row.add(buttonText.getTexts().get("payment"));
-        row.add(buttonText.getTexts().get("cart"));
+        row.add(buttonText.getTexts(bot_id).get("catalog"));
+        row.add(buttonText.getTexts(bot_id).get("payment"));
+        row.add(buttonText.getTexts(bot_id).get("cart"));
 
         keyboardRows.add(row);
 
@@ -165,7 +165,7 @@ public class StartCommandHandler implements CommandHandler {
 
  */
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-        sendWhatever.sendhere_message(sender, chatId, "greeting", null,  keyboardMarkup);
+        sendWhatever.sendhere_message(bot_id,sender, chatId, "greeting", null,  keyboardMarkup);
         katalog_all(chatId, bot_id);
 
     }
@@ -200,7 +200,7 @@ public class StartCommandHandler implements CommandHandler {
         List<InlineKeyboardButton> rowInLine = new ArrayList<>();
         var allk = new InlineKeyboardButton();
 
-        allk.setText(buttonText.getTexts().get("catalog"));
+        allk.setText(buttonText.getTexts(bot_id).get("catalog"));
         allk.setCallbackData("ALL_KATALOG_BUTTON");
 
 
@@ -214,7 +214,7 @@ public class StartCommandHandler implements CommandHandler {
         //executeMessage(message);
 
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-        sendWhatever.sendhere_message(sender, chatId, "menu", markupInLine,  null );
+        sendWhatever.sendhere_message(bot_id,sender, chatId, "menu", markupInLine,  null );
         System.out.println("(((");
     }
 

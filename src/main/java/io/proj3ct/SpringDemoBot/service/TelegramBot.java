@@ -299,12 +299,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 cartService.clearCart(user.getChatId());
 
             }
-            add_DELIVERY.remove(user.getChatId());
+            /*
+            add_DELIVERY.remove(user.getChatId(), bot.getId());
             wait_photo.remove(user.getChatId());
             sent.remove(user.getChatId());
             wait_id.remove(user.getChatId());
             media.remove(user.getChatId());
             adres.remove(user.getChatId());
+
+             */
 
 
         }
@@ -332,7 +335,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
             if(order.getDelivery() == null){
-
+            /*
                 orderService.deny_paiment(order.getId(), order.getUser().getChatId());
                 add_DELIVERY.remove(user.getChatId());
                 wait_photo.remove(user.getChatId());
@@ -340,18 +343,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                 wait_id.remove(user.getChatId());
                 media.remove(user.getChatId());
 
+             */
+
             }
 
-            else if(wait_photo.getOrDefault(user.getChatId(), false)){
-
+            //else if(wait_photo.getOrDefault(user.getChatId(), false)){
+                    /*
                 orderService.deny_paiment(order.getId(), order.getUser().getChatId());
                 add_DELIVERY.remove(user.getChatId());
                 wait_photo.remove(user.getChatId());
                 sent.remove(user.getChatId());
                 wait_id.remove(user.getChatId());
                 media.remove(user.getChatId());
+                     */
 
-            }
+        //    }
 
 
 

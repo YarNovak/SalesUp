@@ -10,8 +10,6 @@ import java.util.Map;
 @Component
 public class Adddelivery {
 
-    @Autowired
-    private BotConfig config;
 
     private final Map<Person, Boolean> add_DELIVERY = new HashMap<>();
 
@@ -19,15 +17,15 @@ public class Adddelivery {
         add_DELIVERY.clear();
     }
 
-    public boolean getOrDefault(Long chatId, boolean f) {
-        return add_DELIVERY.getOrDefault(new Person(chatId, Long.valueOf(config.getBoit())), false);
+    public boolean getOrDefault(Long chatId, boolean f, Long bot_id) {
+        return add_DELIVERY.getOrDefault(new Person(chatId, bot_id), false);
     }
 
-    public void put(Long chatId, boolean f) {
-        add_DELIVERY.put(new Person(chatId, Long.valueOf(config.getBoit())), true);
+    public void put(Long chatId, boolean f, Long bot_id) {
+        add_DELIVERY.put(new Person(chatId, bot_id), true);
     }
 
-    public void remove(Long chatId) {
-        add_DELIVERY.remove(new Person(chatId, Long.valueOf(config.getBoit())));
+    public void remove(Long chatId, Long bot_id) {
+        add_DELIVERY.remove(new Person(chatId, bot_id));
     }
 }

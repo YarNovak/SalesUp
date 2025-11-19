@@ -88,7 +88,7 @@ public class DenyCallbackHandler implements CallbackHandler {
                 "\n" +
                 "Вскоре мы исправим это недорозумение\uD83E\uDD7A");
         orderService.deny_paiment(itemtId,  order.getUser().getChatId());
-        sendWhatever.sendhere_message(bot,  order.getUser().getChatId(), "deny",  null, null);
+        sendWhatever.sendhere_message(bot_id,bot,  order.getUser().getChatId(), "deny",  null, null);
         try {
             //  execute(sendMessage);
            // bot.execute(photo);

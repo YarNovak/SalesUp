@@ -75,27 +75,27 @@ public class DeliveryHandler {
 
         Optional<Orders> order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
 
-        String catalog = buttonText.getTexts().get("catalog");
-        String cart = buttonText.getTexts().get("cart");
-        String payment = buttonText.getTexts().get("payment");
+        String catalog = buttonText.getTexts(bot_id).get("catalog");
+        String cart = buttonText.getTexts(bot_id).get("cart");
+        String payment = buttonText.getTexts(bot_id).get("payment");
 
 
         if((!vapecomponyKatalogRepository.findByNameAndBot_Id(messageText, bot_id).isEmpty()) ||(messageText.startsWith("/")) || (messageText.equals(catalog)) || (messageText.equals(cart)) || (messageText.equals(payment) ) && (!messageText.equals(botMessageRepository.findByMessageKeyAndBot_Id("delivery", bot_id).get()))) {
 
-            sendWhatever.sendhere_message(sender, chatId, "delivery",  null, null);
+            sendWhatever.sendhere_message(bot_id,sender, chatId, "delivery",  null, null);
             return;
         }
 
         if (order.isPresent()) {
             Orders or = order.get();
             or.setDelivery(messageText);
-            adres.put(chatId, messageText);
-            add_DELIVERY.remove(chatId);
+            adres.put(chatId, messageText, bot_id);
+            add_DELIVERY.remove(chatId, bot_id);
             orderRepository.save(or);
             if (or.getCash_card().equals("CARD")) {
 
                 if (or.getCurrency().equals("PLN")) {
-                    wait_photo.put(chatId, true);
+                    wait_photo.put(chatId, true, bot_id);
 
 
 
@@ -108,7 +108,7 @@ public class DeliveryHandler {
                   // sendText(chatId, config.get_exet_card());
                                     */
 
-                    sendWhatever.sendhere_message(sender, chatId, "send_money",  null, null);
+                    sendWhatever.sendhere_message(bot_id,sender, chatId, "send_money",  null, null);
                    // wait_photo.put(chatId, true);
                     return;
 
@@ -130,8 +130,8 @@ public class DeliveryHandler {
                     sendText(chatId, config.getUkr_card());
 
                      */
-                    sendWhatever.sendhere_message(sender, chatId, "send_money",  null, null);
-                    wait_photo.put(chatId, true);
+                    sendWhatever.sendhere_message(bot_id,sender, chatId, "send_money",  null, null);
+                    wait_photo.put(chatId, true, bot_id);
                     return;
 
                 }
@@ -139,8 +139,8 @@ public class DeliveryHandler {
             } else {
                 // if(stop.getOrDefault(chatId, false)) return;
 
-                Contact contact =  media.get(chatId);
-                media.remove(chatId);
+                Contact contact =  media.get(chatId, bot_id);
+                media.remove(chatId, bot_id);
                 SendMessage photo = new SendMessage();
                 SendContact sendContact = new SendContact();
                 sendContact.setChatId(botRepository.findById(bot_id).get().getOwner().getTelegramId().toString());
@@ -192,7 +192,7 @@ public class DeliveryHandler {
 
                      */
 
-                    sendWhatever.sendhere_message(sender, chatId, "congrat",  null, null);
+                    sendWhatever.sendhere_message(bot_id,sender, chatId, "congrat",  null, null);
 
                     // Orders ord = orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).get();
                     User us = userRepository.findByChatIdAndBot_Id(chatId, bot_id).get();
@@ -201,10 +201,10 @@ public class DeliveryHandler {
                     // sendText(config.getOwnerId(),  orderRepository.findByUser_ChatId(chatId).get().getUser().getUserName() + "замовив замовлення на суму "+ sendCarteditor_Total(chatId)+"zł за допомогою "+orderRepository.findByChatId(chatId).get().getCurrency()+ "карти");
 
                     // photo.setCaption(orderRepository.findByUser_ChatId(chatId).get().getUser().getUserName() + "замовив замовлення на суму "+ sendCarteditor_Total(chatId)+"zł за допомогою готівки" + "\n"+sendCarteditor_Total(chatId)+);
-                    photo.setText( escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId, bot_id) +buttonText.getTexts().get("curr") + " наличкой\n\n")  + sendCarteditor_Text(chatId, bot_id)+  escapeMarkdown( "\n\n"+"Адрес: "+adres.get(chatId)));
+                    photo.setText( escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId, bot_id) +buttonText.getTexts(bot_id).get("curr") + " наличкой\n\n")  + sendCarteditor_Text(chatId, bot_id)+  escapeMarkdown( "\n\n"+"Адрес: "+adres.get(chatId, bot_id)));
 
 
-                    adres.remove(chatId);
+                    adres.remove(chatId, bot_id);
 
                     orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId(), chatId);
                     sender.execute(photo);
@@ -270,7 +270,7 @@ public class DeliveryHandler {
             sb.append(escapeMarkdown(""));
             return sb.toString();
         }
-        sb.append(escapeMarkdown(buttonText.getTexts().get("cart")+":\n\n"));
+        sb.append(escapeMarkdown(buttonText.getTexts(bot_id).get("cart")+":\n\n"));
         double total = 0.0;
 
         for(CartItem item : items){
@@ -285,7 +285,7 @@ public class DeliveryHandler {
                     .append(escapeMarkdown("  ×  "))
                     .append(escapeMarkdown(String.valueOf(quantity)))
                     .append(escapeMarkdown(" → "))
-                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts().get("curr"))).append("__")
+                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts(bot_id).get("curr"))).append("__")
                     .append(escapeMarkdown("💰\n"));
 
             total += price;
@@ -295,7 +295,7 @@ public class DeliveryHandler {
 
         }
 
-        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts().get("curr")).append("__*");
+        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts(bot_id).get("curr")).append("__*");
     /*
         sb.append("\n\n\n" +
                 "❗\uFE0FВНИМАНИЕ❗\uFE0F\n" +

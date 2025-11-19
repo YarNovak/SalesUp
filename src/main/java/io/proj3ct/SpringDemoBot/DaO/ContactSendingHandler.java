@@ -64,7 +64,7 @@ public class ContactSendingHandler {
 
         sendKeyboard(chatId, "Теперь у нас есть возможность быть к вам ближе!)", bot_id);
 
-        wait_id.remove(chatId);
+        wait_id.remove(chatId, bot_id);
 
         // List<PhotoSize> photos = update.getMessage().getPhoto();
         // PhotoSize largestPhoto = photos.get(photos.size() - 1); // Найбільше за розміром
@@ -72,7 +72,7 @@ public class ContactSendingHandler {
 
         //InputMediaPhoto inputMedia = new InputMediaPhoto(fileId);
 
-        media.put(chatId, update.getMessage().getContact());
+        media.put(chatId, update.getMessage().getContact(), bot_id);
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getCash_card().equals("CASH")) sendchoise_message2(chatId, "CASH", bot_id);
         else sendchoise_message2(chatId, "CARD", bot_id);
 
@@ -112,9 +112,9 @@ public class ContactSendingHandler {
         // row.add("\uD83D\uDCB8Оплата");
         // row.add("\uD83D\uDED2Корзина");
 
-        row.add(buttonText.getTexts().get("catalog"));
-        row.add(buttonText.getTexts().get("payment"));
-        row.add(buttonText.getTexts().get("cart"));
+        row.add(buttonText.getTexts(bot_id).get("catalog"));
+        row.add(buttonText.getTexts(bot_id).get("payment"));
+        row.add(buttonText.getTexts(bot_id).get("cart"));
 
         keyboardRows.add(row);
 
@@ -127,7 +127,7 @@ public class ContactSendingHandler {
 
         //executeMessage(message);
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-        sendWhatever.sendhere_message(sender, chatId, "phone_thanks",  null, keyboardMarkup);
+        sendWhatever.sendhere_message(bot_id, sender, chatId, "phone_thanks",  null, keyboardMarkup);
 
 
 
@@ -137,7 +137,7 @@ public class ContactSendingHandler {
     public void sendchoise_message2(long chatId, String cur, Long bot_id){
 
 
-        add_DELIVERY.put(chatId, true);
+        add_DELIVERY.put(chatId, true, bot_id);
 
         Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get();
         order.setCurrency("PLN");
@@ -175,7 +175,7 @@ public class ContactSendingHandler {
                 "✅kod pocztowy 10007.");
 
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-        sendWhatever.sendhere_message(sender, chatId, "delivery",  null, null);
+        sendWhatever.sendhere_message(bot_id, sender, chatId, "delivery",  null, null);
 
     }
 

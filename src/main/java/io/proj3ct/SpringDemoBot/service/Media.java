@@ -11,8 +11,6 @@ import java.util.Map;
 @Component
 public class Media {
 
-    @Autowired
-    private BotConfig config;
 
     private final Map<Person, Contact> media = new HashMap<>();
 
@@ -20,16 +18,16 @@ public class Media {
         media.clear();
     }
 
-    public Contact get(Long chatId) {
-        return media.get(new Person(chatId, Long.valueOf(config.getBoit())));
+    public Contact get(Long chatId, Long bot_id) {
+        return media.get(new Person(chatId, bot_id));
     }
 
-    public void put(Long chatId, Contact contact) {
-        media.put(new Person(chatId, Long.valueOf(config.getBoit())), contact);
+    public void put(Long chatId, Contact contact, Long bot_id) {
+        media.put(new Person(chatId, bot_id), contact);
     }
 
-    public void remove(Long chatId) {
-        media.remove(new Person(chatId, Long.valueOf(config.getBoit())));
+    public void remove(Long chatId, Long bot_id) {
+        media.remove(new Person(chatId, bot_id));
     }
 
 }

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class PaymentCommandHandler implements CommandHandler {
+public class PaymentCommandHandler implements ButtonsMapHandler {
 
 
     @Autowired
@@ -47,8 +47,8 @@ public class PaymentCommandHandler implements CommandHandler {
     private MessageRegistry messageRegistry;
 
     @Override
-    public boolean support(String command) {
-        return buttonText.getTexts().get("payment").equals(command);
+    public boolean support(String command, Long bot_id) {
+        return buttonText.getTexts(bot_id).get("payment").equals(command);
     }
 
     TelegramLongPollingBot bot;
@@ -75,7 +75,7 @@ public class PaymentCommandHandler implements CommandHandler {
             List<InlineKeyboardButton> rowInLine = new ArrayList<>();
             var yesButton = new InlineKeyboardButton();
 
-            yesButton.setText(buttonText.getTexts().get("catalog"));
+            yesButton.setText(buttonText.getTexts(bot_id).get("catalog"));
             yesButton.setCallbackData("ALL_KATALOG_BUTTON");
 
             rowInLine.add(yesButton);
@@ -86,7 +86,7 @@ public class PaymentCommandHandler implements CommandHandler {
 
             //    executeMessage(sendMessage);
 
-            sendWhatever.sendhere_message(bot, chatId, "clearing",  markupInLine, null);
+            sendWhatever.sendhere_message(bot_id,bot, chatId, "clearing",  markupInLine, null);
 
 
 
@@ -180,9 +180,9 @@ public class PaymentCommandHandler implements CommandHandler {
 
 
 
-        InlineKeyboardButton editButton = new InlineKeyboardButton(buttonText.getTexts().get("cart_method"));
+        InlineKeyboardButton editButton = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("cart_method"));
         editButton.setCallbackData("CARD");
-        InlineKeyboardButton clearButton = new InlineKeyboardButton(buttonText.getTexts().get("cash_method"));
+        InlineKeyboardButton clearButton = new InlineKeyboardButton(buttonText.getTexts(bot_id).get("cash_method"));
         clearButton.setCallbackData("CASH");
         if(botik.isCart()) row1.add(editButton);
         if(botik.isNalichka())row1.add(clearButton);
@@ -222,7 +222,7 @@ public class PaymentCommandHandler implements CommandHandler {
             sb.append(escapeMarkdown(""));
             return sb.toString();
         }
-        sb.append(escapeMarkdown(buttonText.getTexts().get("cart")+":\n\n"));
+        sb.append(escapeMarkdown(buttonText.getTexts(bot_id).get("cart")+":\n\n"));
         double total = 0.0;
 
         for(CartItem item : items){
@@ -237,7 +237,7 @@ public class PaymentCommandHandler implements CommandHandler {
                     .append(escapeMarkdown("  ×  "))
                     .append(escapeMarkdown(String.valueOf(quantity)))
                     .append(escapeMarkdown(" → "))
-                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts().get("curr"))).append("__")
+                    .append("__").append(escapeMarkdown(String.valueOf(price))).append(escapeMarkdown(buttonText.getTexts(bot_id).get("curr"))).append("__")
                     .append(escapeMarkdown("💰\n"));
 
             total += price;
@@ -247,7 +247,7 @@ public class PaymentCommandHandler implements CommandHandler {
 
         }
 
-        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts().get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts().get("curr")).append("__*");
+        sb.append(escapeMarkdown("\n")).append(escapeMarkdown(buttonText.getTexts(bot_id).get("payment")) + " ").append("*__").append(escapeMarkdown(String.valueOf(total))).append(buttonText.getTexts(bot_id).get("curr")).append("__*");
     /*
         sb.append("\n\n\n" +
                 "❗\uFE0FВНИМАНИЕ❗\uFE0F\n" +

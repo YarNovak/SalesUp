@@ -95,7 +95,7 @@ public class CashCallbackHandler implements CallbackHandler{
         keyboardMarkup.setResizeKeyboard(true);
         keyboardMarkup.setOneTimeKeyboard(true);
 
-        KeyboardButton contactButton = new KeyboardButton(buttonText.getTexts().get("contact"));
+        KeyboardButton contactButton = new KeyboardButton(buttonText.getTexts(bot_id).get("contact"));
         contactButton.setRequestContact(true); // << це головне
 
         KeyboardRow row = new KeyboardRow();
@@ -108,12 +108,12 @@ public class CashCallbackHandler implements CallbackHandler{
         message.setReplyMarkup(keyboardMarkup);
 
 
-        wait_id.put(chatId, true);
+        wait_id.put(chatId, true, bot_id);
 
 
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
 
-        sendWhatever.sendhere_message(sender, chatId, "phone",  null, keyboardMarkup);
+        sendWhatever.sendhere_message(bot_id, sender, chatId, "phone",  null, keyboardMarkup);
         //bot.execute(message);
 
 

@@ -106,7 +106,7 @@ public class KatalogCallbackHandler implements CallbackHandler {
 
         // executeMessage(message);
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-        sendWhatever.sendhere_message(sender, chatId, "catalog",  markupInLine, null);
+        sendWhatever.sendhere_message(bot_id,sender, chatId, "catalog",  markupInLine, null);
 
     }
 
@@ -116,7 +116,7 @@ public class KatalogCallbackHandler implements CallbackHandler {
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
             SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             return true;
 
 
@@ -129,7 +129,7 @@ public class KatalogCallbackHandler implements CallbackHandler {
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
-            //  sendWhatever.sendhere_message(bot, chatId, "please_whait", null, null);
+            //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
             orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
         }

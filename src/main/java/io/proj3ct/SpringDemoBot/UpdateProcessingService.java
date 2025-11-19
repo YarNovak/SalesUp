@@ -238,7 +238,7 @@ public class UpdateProcessingService {
 
         if( update.hasMessage() && update.getMessage().hasContact()){
 
-            if(wait_id.getOrDefault(update.getMessage().getChatId(), false)){
+            if(wait_id.getOrDefault(update.getMessage().getChatId(), false, bot.getId())){
 
                 contactSendingHandler.get_contact(update, bot.getId());
 
@@ -252,7 +252,7 @@ public class UpdateProcessingService {
 
             long chatId = update.getMessage().getChatId();
             System.out.println("02020202020202");
-            if (wait_photo.getOrDefault(chatId, false)){
+            if (wait_photo.getOrDefault(chatId, false, bot.getId() )){
 
                 photoHandler.photo_Handle(update, bot.getId());
 
@@ -264,7 +264,7 @@ public class UpdateProcessingService {
 
         else if(update.hasMessage() && update.getMessage().hasText()) {
 
-            if(add_DELIVERY.getOrDefault(update.getMessage().getChatId(), false)){
+            if(add_DELIVERY.getOrDefault(update.getMessage().getChatId(), false,bot.getId())){
 
                 try {
                     System.out.println("SOOOOOOOOOS");
@@ -304,12 +304,12 @@ public class UpdateProcessingService {
                     cartService.clearCart(user.getChatId());
 
                 }
-                add_DELIVERY.remove(user.getChatId());
-                wait_photo.remove(user.getChatId());
-                sent.remove(user.getChatId());
-                wait_id.remove(user.getChatId());
-                media.remove(user.getChatId());
-                adres.remove(user.getChatId());
+                add_DELIVERY.remove(user.getChatId(), bot.getId());
+                wait_photo.remove(user.getChatId(), bot.getId());
+                sent.remove(user.getChatId(), bot.getId());
+                wait_id.remove(user.getChatId(), bot.getId());
+                media.remove(user.getChatId(), bot.getId());
+                adres.remove(user.getChatId(), bot.getId());
 
 
             }
@@ -345,22 +345,22 @@ public class UpdateProcessingService {
             if(order.getDelivery() == null){
 
                 orderService.deny_paiment(order.getId(), order.getUser().getChatId());
-                add_DELIVERY.remove(user.getChatId());
-                wait_photo.remove(user.getChatId());
-                sent.remove(user.getChatId());
-                wait_id.remove(user.getChatId());
-                media.remove(user.getChatId());
+                add_DELIVERY.remove(user.getChatId(), bot.getId());
+                wait_photo.remove(user.getChatId(), bot.getId());
+                sent.remove(user.getChatId(), bot.getId());
+                wait_id.remove(user.getChatId(), bot.getId());
+                media.remove(user.getChatId(), bot.getId());
 
             }
 
-            else if(wait_photo.getOrDefault(user.getChatId(), false)){
+            else if(wait_photo.getOrDefault(user.getChatId(), false, bot.getId())){
 
                 orderService.deny_paiment(order.getId(), order.getUser().getChatId());
-                add_DELIVERY.remove(user.getChatId());
-                wait_photo.remove(user.getChatId());
-                sent.remove(user.getChatId());
-                wait_id.remove(user.getChatId());
-                media.remove(user.getChatId());
+                add_DELIVERY.remove(user.getChatId(), bot.getId());
+                wait_photo.remove(user.getChatId(), bot.getId());
+                sent.remove(user.getChatId(), bot.getId());
+                wait_id.remove(user.getChatId(), bot.getId());
+                media.remove(user.getChatId(), bot.getId());
 
             }
 
