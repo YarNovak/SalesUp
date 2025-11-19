@@ -8,7 +8,6 @@ import io.proj3ct.SpringDemoBot.DaO.HowmuchyouhaveHandler;
 import io.proj3ct.SpringDemoBot.DaO.PhotoHandler;
 import io.proj3ct.SpringDemoBot.Dispetchers.CallbackDispatcher;
 import io.proj3ct.SpringDemoBot.Dispetchers.CommandDispatcher;
-import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.model.*;
 import io.proj3ct.SpringDemoBot.repository.BotRepository;
@@ -269,7 +268,7 @@ public class UpdateProcessingService {
 
                 try {
                     System.out.println("SOOOOOOOOOS");
-                    deliveryHandler.handle_Delivery(update, sender);
+                    deliveryHandler.handle_Delivery(update, sender, bot.getId());
                 }
                 catch (TelegramApiException e) {
                     e.printStackTrace();
@@ -292,111 +291,111 @@ public class UpdateProcessingService {
 
 
 
-//    @Scheduled(cron = "0 */15 * * * *")
-//    private void del_timeout(){
-//
-//        Timestamp now = Timestamp.from(Instant.now());
-//        Timestamp nowMinusMin = Timestamp.from(now.toInstant().minus(1, ChronoUnit.MINUTES));
-//
-//        for(Bot bot: botRepository.findAll()){
-//
-//            for(User user: userRepository.findByLastUpdatedBeforeAndBot_Id(nowMinusMin, bot.getId())){
-//                if((user.getLastUpdated().before(nowMinusMin)) && (orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(user.getChatId(), false, bot.getId()).isEmpty())){
-//                    cartService.clearCart(user.getChatId());
-//
-//                }
-//                add_DELIVERY.remove(user.getChatId());
-//                wait_photo.remove(user.getChatId());
-//                sent.remove(user.getChatId());
-//                wait_id.remove(user.getChatId());
-//                media.remove(user.getChatId());
-//                adres.remove(user.getChatId());
-//
-//
-//            }
-//
-//        }
-//
-//
-//
-//    }
-//    @Scheduled(cron = "1 */20 * * * *")
-//    private void delorders_timeout(){
-//            /*
-//        Timestamp now = Timestamp.from(Instant.now());
-//        Timestamp nowMinusMin = Timestamp.from(now.toInstant().minus(1, ChronoUnit.MINUTES));
-//        for(Orders order : orderRepository.findByCreatedAtBefore(nowMinusMin)){
-//            if((order.getCreatedAt().before(nowMinusMin)) && (!order.isPaid())){
-//                cartService.clearCart(order.getUser().getChatId());
-//                orderRepository.delete(order);
-//            }
-//        }
-//             */
-//
-//    for(Bot bot: botRepository.findAll()){
-//
-//        for(User user : userRepository.findAll()){
-//
-//            System.out.println("BEATCH");
-//            Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(user.getChatId(), false, bot.getId());
-//            if(or.isEmpty()){continue;}
-//            Orders order = or.get();
-//
-//
-//            if(order.getDelivery() == null){
-//
-//                orderService.deny_paiment(order.getId(), order.getUser().getChatId());
-//                add_DELIVERY.remove(user.getChatId());
-//                wait_photo.remove(user.getChatId());
-//                sent.remove(user.getChatId());
-//                wait_id.remove(user.getChatId());
-//                media.remove(user.getChatId());
-//
-//            }
-//
-//            else if(wait_photo.getOrDefault(user.getChatId(), false)){
-//
-//                orderService.deny_paiment(order.getId(), order.getUser().getChatId());
-//                add_DELIVERY.remove(user.getChatId());
-//                wait_photo.remove(user.getChatId());
-//                sent.remove(user.getChatId());
-//                wait_id.remove(user.getChatId());
-//                media.remove(user.getChatId());
-//
-//            }
-//
-//
-//
-//            //    orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).get().getId())
-//            //  orderRepository.findByUser_ChatIdAndPaidEquals(order.getUser().getChatId(), false).get().getId();
-//
-//        }
-//
-//
-//    }
-//
-//    }
-//
-//    private String escapeMarkdown(String text) {
-//        return text.replace("\\", "\\\\")  // Екрануємо зворотні слеші
-//                .replace("_", "\\_")
-//                .replace("*", "\\*")
-//                .replace("[", "\\[")
-//                .replace("]", "\\]")
-//                .replace("(", "\\(")
-//                .replace(")", "\\)")
-//                .replace("~", "\\~")
-//                .replace("`", "\\`")
-//                .replace(">", "\\>")
-//                .replace("#", "\\#")
-//                .replace("+", "\\+")
-//                .replace("-", "\\-")
-//                .replace("=", "\\=")
-//                .replace("|", "\\|")
-//                .replace("{", "\\{")
-//                .replace("}", "\\}")
-//                .replace(".", "\\.")
-//                .replace("!", "\\!");
-//    }
+    @Scheduled(cron = "0 */15 * * * *")
+    public void del_timeout(){
+
+        Timestamp now = Timestamp.from(Instant.now());
+        Timestamp nowMinusMin = Timestamp.from(now.toInstant().minus(1, ChronoUnit.MINUTES));
+
+        for(Bot bot: botRepository.findAll()){
+
+            for(User user: userRepository.findByLastUpdatedBeforeAndBot_Id(nowMinusMin, bot.getId())){
+                if((user.getLastUpdated().before(nowMinusMin)) && (orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(user.getChatId(), false, bot.getId()).isEmpty())){
+                    cartService.clearCart(user.getChatId());
+
+                }
+                add_DELIVERY.remove(user.getChatId());
+                wait_photo.remove(user.getChatId());
+                sent.remove(user.getChatId());
+                wait_id.remove(user.getChatId());
+                media.remove(user.getChatId());
+                adres.remove(user.getChatId());
+
+
+            }
+
+        }
+
+
+
+    }
+    @Scheduled(cron = "1 */20 * * * *")
+    public void delorders_timeout(){
+            /*
+        Timestamp now = Timestamp.from(Instant.now());
+        Timestamp nowMinusMin = Timestamp.from(now.toInstant().minus(1, ChronoUnit.MINUTES));
+        for(Orders order : orderRepository.findByCreatedAtBefore(nowMinusMin)){
+            if((order.getCreatedAt().before(nowMinusMin)) && (!order.isPaid())){
+                cartService.clearCart(order.getUser().getChatId());
+                orderRepository.delete(order);
+            }
+        }
+             */
+
+    for(Bot bot: botRepository.findAll()){
+
+        for(User user : userRepository.findAll()){
+
+            System.out.println("BEATCH");
+            Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(user.getChatId(), false, bot.getId());
+            if(or.isEmpty()){continue;}
+            Orders order = or.get();
+
+
+            if(order.getDelivery() == null){
+
+                orderService.deny_paiment(order.getId(), order.getUser().getChatId());
+                add_DELIVERY.remove(user.getChatId());
+                wait_photo.remove(user.getChatId());
+                sent.remove(user.getChatId());
+                wait_id.remove(user.getChatId());
+                media.remove(user.getChatId());
+
+            }
+
+            else if(wait_photo.getOrDefault(user.getChatId(), false)){
+
+                orderService.deny_paiment(order.getId(), order.getUser().getChatId());
+                add_DELIVERY.remove(user.getChatId());
+                wait_photo.remove(user.getChatId());
+                sent.remove(user.getChatId());
+                wait_id.remove(user.getChatId());
+                media.remove(user.getChatId());
+
+            }
+
+
+
+            //    orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).get().getId())
+            //  orderRepository.findByUser_ChatIdAndPaidEquals(order.getUser().getChatId(), false).get().getId();
+
+        }
+
+
+        }
+
+    }
+
+    private String escapeMarkdown(String text) {
+        return text.replace("\\", "\\\\")  // Екрануємо зворотні слеші
+                .replace("_", "\\_")
+                .replace("*", "\\*")
+                .replace("[", "\\[")
+                .replace("]", "\\]")
+                .replace("(", "\\(")
+                .replace(")", "\\)")
+                .replace("~", "\\~")
+                .replace("`", "\\`")
+                .replace(">", "\\>")
+                .replace("#", "\\#")
+                .replace("+", "\\+")
+                .replace("-", "\\-")
+                .replace("=", "\\=")
+                .replace("|", "\\|")
+                .replace("{", "\\{")
+                .replace("}", "\\}")
+                .replace(".", "\\.")
+                .replace("!", "\\!");
+    }
 
 }

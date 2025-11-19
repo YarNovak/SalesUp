@@ -31,9 +31,6 @@ public class CartCommandHandler implements CommandHandler {
     private CartItemRepository cartItemRepository;
 
     @Autowired
-    private BotConfig config;
-
-    @Autowired
     private OrdersRepository orderRepository;
 
     @Autowired
@@ -62,12 +59,12 @@ public class CartCommandHandler implements CommandHandler {
     public void handle(Message message, Long bot_id) {
 
 
-        if(sendcart_nope(message.getChatId())) return;
+        if(sendcart_nope(message.getChatId(), bot_id)) return;
         getCartView(message.getChatId(), bot_id);
 
     }
 
-    private boolean sendcart_nope(Long chatId){
+    private boolean sendcart_nope(Long chatId, Long bot_id){
 /*
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
@@ -82,7 +79,7 @@ public class CartCommandHandler implements CommandHandler {
 
  */
 
-        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
@@ -101,7 +98,7 @@ public class CartCommandHandler implements CommandHandler {
         message.setParseMode("MarkdownV2");
 
 
-        List<CartItem> items = cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items = cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
             message.setText("\uD83D\uDED2 Вашаfffffffff корзина пуста, \n" +
                     "мы воздух без вкуса не продаем \uD83D\uDE0B");

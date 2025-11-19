@@ -39,9 +39,6 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
     private OrdersRepository orderRepository;
 
     @Autowired
-    private BotConfig config;
-
-    @Autowired
     private OrderService orderService;
 
     @Autowired
@@ -74,14 +71,14 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
         String callbackData = query.getData();
         int messageId = query.getMessage().getMessageId();
 
-        if(sendcart_nope(chatId)) return;
+        if(sendcart_nope(chatId, bot_id)) return;
         ///////////////////////////////
         Long itemtId = Long.parseLong(callbackData.split("_")[1]);
         if (callbackData.startsWith("incr2_")) {
-            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get();
+            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
 
 
-            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()));
+            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
             cartService.addToCart(chatId, product.get());
 
             EditMessageText editMessage = new EditMessageText();
@@ -89,12 +86,12 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
             editMessage.setMessageId(messageId);
             editMessage.setParseMode("MarkdownV2");
 
-            if (cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, product.get().getName(), Long.valueOf(config.getBoit())).isPresent()) {
+            if (cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, product.get().getName(), bot_id).isPresent()) {
 
-                editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName()));
-                editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName()));
+                editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName(), bot_id));
+                editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName(), bot_id));
 
-                sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
+                sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName(), bot_id), "MarkdownV2", bot_id, sendCarteditor_KB2(chatId, product.get().getName(), bot_id));
 
             } else {
 
@@ -108,15 +105,15 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 markup.setKeyboard(List.of(List.of(addToCartBtn))); ////
                 editMessage.setReplyMarkup(markup);
 
-                sendWhatever.edithere_firstAdd(sender, chatId, messageId, cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()), markup);
+                sendWhatever.edithere_firstAdd(sender, chatId, messageId, cti.getVapecomponyKatalog().getId(), bot_id, markup);
             }
 
 
 
         } else if (callbackData.startsWith("decr2_")) {
             System.out.println(4);
-            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, Long.valueOf(config.getBoit())).get();
-            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()));
+            CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
+            Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
             cartService.deleteFromCart(chatId, product.get());
 
             EditMessageText editMessage = new EditMessageText();
@@ -124,12 +121,12 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
             editMessage.setMessageId(messageId);
             editMessage.setParseMode("MarkdownV2");
 
-            if (cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, product.get().getName(), Long.valueOf(config.getBoit())).isPresent()) {
+            if (cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, product.get().getName(), bot_id).isPresent()) {
 
-                editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName()));
-                editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName()));
+                editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName(), bot_id));
+                editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName(), bot_id));
 
-                sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
+                sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName(), bot_id), "MarkdownV2", bot_id, sendCarteditor_KB2(chatId, product.get().getName(), bot_id));
 
             } else {
                 System.out.println("0000000000000000000000000000000000000000000000000000000");
@@ -147,7 +144,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
                 editMessage.setReplyMarkup(markup);
 
                 System.out.println("TUT");
-                sendWhatever.edithere_firstAdd(sender, chatId, messageId, cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()), markup);
+                sendWhatever.edithere_firstAdd(sender, chatId, messageId, cti.getVapecomponyKatalog().getId(), bot_id, markup);
 
 
 
@@ -157,7 +154,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
         }
 
     }
-    private boolean sendcart_nope(Long chatId){
+    private boolean sendcart_nope(Long chatId, Long bot_id){
 /*
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
@@ -169,7 +166,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
  */
 
-        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
@@ -182,15 +179,15 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
 
     }
-    private String sendCarteditor_Text2(Long chatId,  String name){
+    private String sendCarteditor_Text2(Long chatId,  String name, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
         List<CartItem> items = new ArrayList<>();
-        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).get();
+        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).get();
         items.add(prod);
-        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).isPresent()){
+        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).isPresent()){
 
             sb.append(escapeMarkdown(name.replace("/", "").trim()));
             return sb.toString();
@@ -227,7 +224,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
         //  }
         return sb.toString();
     }
-    private InlineKeyboardMarkup sendCarteditor_KB2(Long chatId, String name){
+    private InlineKeyboardMarkup sendCarteditor_KB2(Long chatId, String name, Long bot_id){
 
 
 
@@ -235,10 +232,10 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
 
         List<CartItem> items = new ArrayList<>();
-        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).get();
+        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).get();
         items.add(prod);
 
-        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).isPresent()){
+        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).isPresent()){
             return null;
         }
 

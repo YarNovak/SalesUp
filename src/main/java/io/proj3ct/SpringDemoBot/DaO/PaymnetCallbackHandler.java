@@ -38,9 +38,6 @@ public class PaymnetCallbackHandler implements CallbackHandler {
     private OrdersRepository orderRepository;
 
     @Autowired
-    private BotConfig config;
-
-    @Autowired
     private BotRepository botRepository;
 
     @Autowired
@@ -72,7 +69,7 @@ public class PaymnetCallbackHandler implements CallbackHandler {
         Long chatId = query.getMessage().getChatId();
         int messageId = query.getMessage().getMessageId();
 
-        if(cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit())).isEmpty()){
+        if(cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id).isEmpty()){
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(String.valueOf(chatId));
 
@@ -102,38 +99,38 @@ public class PaymnetCallbackHandler implements CallbackHandler {
 
         }
         else{
-            create_order(chatId);
+            create_order(chatId, bot_id);
             send_pay(chatId, messageId, bot_id);
         }
 
     }
 
-    private void create_order(Long chatId) {
+    private void create_order(Long chatId, Long bot_id) {
 
-        if (!userRepository.existsByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()))) {
+        if (!userRepository.existsByChatIdAndBot_Id(chatId, bot_id)) {
             User user = new User();
             user.setChatId(chatId);
-            user.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            user.setBot(botRepository.findById(bot_id).get());
             userRepository.save(user);
         }
 
 
         //if(orderRepository.findByUser_ChatIdAndPaidEquals(userRepository.findByChatId(chatId).get().getChatId(), false).isPresent())
 
-        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get().getChatId(), false, Long.valueOf(config.getBoit())).isPresent()){
+        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(userRepository.findByChatIdAndBot_Id(chatId, bot_id).get().getChatId(), false, bot_id).isPresent()){
 
-            Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get();
+            Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get();
             order.setUser(userRepository.findById(chatId).get());
             order.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             order.setStatus("inprocces");
-            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, bot_id);
             System.out.println(order.getCreatedAt().toString());
             List<FinalItem> finalItems = cartItems.stream().map(cartItem -> {
                 FinalItem finalItem = new FinalItem();
                 finalItem.setName(cartItem.getVapecomponyKatalog().getName());
                 finalItem.setCena(cartItem.getVapecomponyKatalog().getCena());
                 finalItem.setQuantity(cartItem.getQuantity());
-                finalItem.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+                finalItem.setBot(botRepository.findById(bot_id).get());
                 finalItem.setOrder(order);
                 finalItem.setVid(cartItem.getVapecomponyKatalog().getId());
                 return finalItem;
@@ -141,29 +138,29 @@ public class PaymnetCallbackHandler implements CallbackHandler {
 
 
             order.setFinalItems(finalItems);
-            order.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            order.setBot(botRepository.findById(bot_id).get());
             orderRepository.save(order);
         }
         //if(((orderRepository.findByUser_ChatIdAndPaidEquals(userRepository.findByChatId(chatId).get().getChatId(), true).isPresent()) && (orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).isEmpty()))  || (orderRepository.findByUser_ChatId(chatId).isEmpty()))
         else{
             Orders order = new Orders();
-            order.setUser(userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get());
+            order.setUser(userRepository.findByChatIdAndBot_Id(chatId, bot_id).get());
             order.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             order.setStatus("inprocces");
-            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+            List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, bot_id);
             System.out.println(order.getCreatedAt().toString());
             List<FinalItem> finalItems = cartItems.stream().map(cartItem -> {
                 FinalItem finalItem = new FinalItem();
                 finalItem.setName(cartItem.getVapecomponyKatalog().getName());
                 finalItem.setCena(cartItem.getVapecomponyKatalog().getCena());
                 finalItem.setQuantity(cartItem.getQuantity());
-                finalItem.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+                finalItem.setBot(botRepository.findById(bot_id).get());
                 finalItem.setOrder(order);
                 finalItem.setVid(cartItem.getVapecomponyKatalog().getId());
                 return finalItem;
             }).collect(Collectors.toList());
 
-            order.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            order.setBot(botRepository.findById(bot_id).get());
             order.setFinalItems(finalItems);
             orderRepository.save(order);
         }
@@ -178,7 +175,7 @@ public class PaymnetCallbackHandler implements CallbackHandler {
         EditMessageText message = new EditMessageText();
         message.setChatId(String.valueOf(chatId));
         message.setParseMode("MarkdownV2");
-        message.setText(sendCarteditor_Text(chatId));
+        message.setText(sendCarteditor_Text(chatId, bot_id));
         message.setMessageId(messageId);
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
@@ -186,7 +183,7 @@ public class PaymnetCallbackHandler implements CallbackHandler {
 
         List<InlineKeyboardButton> row1 = new ArrayList<>();
 
-        Bot botik = botRepository.findById(Long.valueOf(config.getBoit())).get();
+        Bot botik = botRepository.findById(bot_id).get();
 
         InlineKeyboardButton editButton = new InlineKeyboardButton(buttonText.getTexts().get("cart_method"));
         editButton.setCallbackData("CARD");
@@ -222,12 +219,12 @@ public class PaymnetCallbackHandler implements CallbackHandler {
 
     }
 
-    private String sendCarteditor_Text(Long chatId){
+    private String sendCarteditor_Text(Long chatId, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
             sb.append(escapeMarkdown(""));
             return sb.toString();

@@ -35,11 +35,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
     private OrdersRepository orderRepository;
 
     @Autowired
-            private OrderService orderService;
-
-
-    @Autowired
-    private BotConfig config;
+    private OrderService orderService;
 
     @Autowired
     private SendWhatever sendWhatever;
@@ -65,7 +61,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
         Long chatId = query.getMessage().getChatId();
         int messageId = query.getMessage().getMessageId();
 
-        if(sendcart_nope(chatId)) return;
+        if(sendcart_nope(chatId, bot_id)) return;
 /////////////////////////////////////////////////////////////////////////
         cartService.clearCart(chatId);
         EditMessageText editMessage = new EditMessageText();
@@ -110,7 +106,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
 
     }
 
-    private boolean sendcart_nope(Long chatId){
+    private boolean sendcart_nope(Long chatId, Long bot_id){
         /*
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
@@ -122,7 +118,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
         return  false;
 
 */
-        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");

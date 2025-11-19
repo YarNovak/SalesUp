@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.CriteriaBuilder;
+
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;

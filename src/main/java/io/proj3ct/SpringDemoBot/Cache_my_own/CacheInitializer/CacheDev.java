@@ -2,6 +2,7 @@ package io.proj3ct.SpringDemoBot.Cache_my_own.CacheInitializer;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.MessagesInf;
+import io.proj3ct.SpringDemoBot.DB_entities.Bot;
 import io.proj3ct.SpringDemoBot.DB_entities.BotMessage;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.repository.BotMessageRepository;
@@ -31,6 +32,10 @@ public class CacheDev {
 
 
     public void initButtonText() {
+
+        List<Bot> bots = botRepository.findAll();
+
+
 
         Map<String, String> buttons = botRepository.findById(Long.valueOf(botConfig.getBoit())).get().getButtonTexts();
         buttonText.setTexts(buttons);

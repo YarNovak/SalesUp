@@ -2,7 +2,7 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.TenantService;
-import io.proj3ct.SpringDemoBot.config.BotConfig;
+
 import io.proj3ct.SpringDemoBot.dopclasses.Formater.Formatter;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
@@ -45,8 +45,7 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
     @Autowired
     private OrdersRepository orderRepository;
 
-    @Autowired
-    private BotConfig config;
+
 
     @Autowired
     private SendWhatever sendWhatever;
@@ -85,23 +84,23 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
             int messageId = query.getMessage().getMessageId();
 
 
-        if(sendcart_nope(chatId)) return;
+        if(sendcart_nope(chatId, bot_id)) return;
 
         System.out.println("Саси хуй");
 
         System.out.println(3);
         Long productId = Long.parseLong(callbackData.split(":")[1]);
-        Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(productId, Long.valueOf(config.getBoit()));
+        Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(productId, bot_id);
 
         cartService.addToCart(chatId, product.get());
-        Optional<User> userik = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+        Optional<User> userik = userRepository.findByChatIdAndBot_Id(chatId, bot_id);
         User us = userik.get();
         us.setLastUpdated(new Timestamp(System.currentTimeMillis()));
 
         userRepository.save(us);
 
 
-        Optional<CartItem> crti = cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, product.get().getName(), Long.valueOf(config.getBoit()));
+        Optional<CartItem> crti = cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, product.get().getName(), bot_id);
 
         EditMessageText editMessage = new EditMessageText();
         editMessage.setChatId(String.valueOf(chatId));
@@ -113,13 +112,13 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
 
 
 
-        editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName()));
+        editMessage.setText(sendCarteditor_Text2(chatId, product.get().getName(), bot_id));
         // editMessage.setText(fm.getText());
         //editMessage.setEntities(fm.getEntities());
-        editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName()));
+        editMessage.setReplyMarkup(sendCarteditor_KB2(chatId, product.get().getName(), bot_id));
 
 
-        sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName()), "MarkdownV2", Long.valueOf(config.getBoit()), sendCarteditor_KB2(chatId, product.get().getName()));
+        sendWhatever.edithere_readyVapecomponyKatalogMessage(sender, product.get(), chatId, messageId, sendCarteditor_Text2(chatId, product.get().getName(), bot_id), "MarkdownV2", bot_id, sendCarteditor_KB2(chatId, product.get().getName(), bot_id));
 
 /*
         try {
@@ -133,7 +132,7 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
         */
 
     }
-    private boolean sendcart_nope(Long chatId){
+    private boolean sendcart_nope(Long chatId, Long bot_id){
 /*
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
@@ -144,7 +143,7 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
         return  false;
 
  */
-        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
@@ -157,15 +156,15 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
 
 
     }
-    private String sendCarteditor_Text2(Long chatId,  String name){
+    private String sendCarteditor_Text2(Long chatId,  String name, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
         List<CartItem> items = new ArrayList<>();
-        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).get();
+        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).get();
         items.add(prod);
-        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).isPresent()){
+        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).isPresent()){
 
             sb.append(escapeMarkdown(name.replace("/", "").trim()));
             return sb.toString();
@@ -203,7 +202,7 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
         return sb.toString();
     }
 
-    private InlineKeyboardMarkup sendCarteditor_KB2(Long chatId, String name){
+    private InlineKeyboardMarkup sendCarteditor_KB2(Long chatId, String name, Long bot_id){
 
 
 
@@ -211,10 +210,10 @@ public class Add_to_cartCallbackHandler implements CallbackHandler {
 
 
         List<CartItem> items = new ArrayList<>();
-        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).get();
+        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).get();
         items.add(prod);
 
-        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).isPresent()){
+        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).isPresent()){
             return null;
         }
 

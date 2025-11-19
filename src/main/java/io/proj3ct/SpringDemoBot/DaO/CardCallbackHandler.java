@@ -35,8 +35,6 @@ public class CardCallbackHandler implements CallbackHandler {
     Wait_id wait_id;
 
     @Autowired
-    private BotConfig config;
-    @Autowired
     private ButtonText buttonText;
 
     @Autowired
@@ -64,7 +62,7 @@ public class CardCallbackHandler implements CallbackHandler {
         String callbackData = query.getData();
         int messageId = query.getMessage().getMessageId();
 
-        Orders or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get();
+        Orders or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get();
         or.setCash_card("CARD");
         orderRepository.save(or);
         send_id(chatId, bot_id);

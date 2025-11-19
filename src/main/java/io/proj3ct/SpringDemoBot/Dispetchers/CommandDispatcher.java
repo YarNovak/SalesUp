@@ -36,8 +36,6 @@ public class CommandDispatcher {
     CartItemRepository cartItemRepository;
 
     @Autowired
-    private BotConfig config;
-    @Autowired
             private MessageRegistry messageRegistry;
     @Autowired
     private TenantService tenantService;
@@ -61,22 +59,22 @@ public class CommandDispatcher {
 
 
 
-        if (vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), Long.valueOf(config.getBoit())).isPresent()){
+        if (vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), bot_id).isPresent()){
 
-            vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), Long.valueOf(config.getBoit())).ifPresent(product -> {
+            vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), bot_id).ifPresent(product -> {
                 SendMessage msg = new SendMessage();
                 msg.setChatId(message.getChatId().toString());
 
 
-                if (cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(message.getChatId(), vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), Long.valueOf(config.getBoit())).get().getName(), Long.valueOf(config.getBoit())).isPresent()) {
+                if (cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(message.getChatId(), vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), bot_id).get().getName(), bot_id).isPresent()) {
 
                     System.out.println(0);
-                    CartItem cti = cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(message.getChatId(), vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), Long.valueOf(config.getBoit())).get().getName(), Long.valueOf(config.getBoit())).get();
-                    Optional<Vapecompony_katalog> production = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), Long.valueOf(config.getBoit()));
+                    CartItem cti = cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(message.getChatId(), vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), bot_id).get().getName(), bot_id).get();
+                    Optional<Vapecompony_katalog> production = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
 
 
-                    msg.setText(sendCarteditor_Text2(message.getChatId(), message.getText()));
-                    msg.setReplyMarkup(sendCarteditor_KB2(message.getChatId(), message.getText()));
+                    msg.setText(sendCarteditor_Text2(message.getChatId(), message.getText(), bot_id));
+                    msg.setReplyMarkup(sendCarteditor_KB2(message.getChatId(), message.getText(), bot_id));
 
 
                 } else {
@@ -94,7 +92,7 @@ public class CommandDispatcher {
                     //!11111111!11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
                     List<Vapecompony_katalog> l = new ArrayList<>();
-                    l.add(vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), Long.valueOf(config.getBoit())).get());
+                    l.add(vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message.getText(), bot_id).get());
                     ////
                     msg.setReplyMarkup(generateProductButtons(l));
 
@@ -125,15 +123,15 @@ public class CommandDispatcher {
 
     }
 
-    private String sendCarteditor_Text2(Long chatId,  String name){
+    private String sendCarteditor_Text2(Long chatId,  String name, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
         List<CartItem> items = new ArrayList<>();
-        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).get();
+        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).get();
         items.add(prod);
-        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).isPresent()){
+        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).isPresent()){
 
             sb.append(escapeMarkdown(name.replace("/", "").trim()));
             return sb.toString();
@@ -172,7 +170,7 @@ public class CommandDispatcher {
     }
 
 
-    private InlineKeyboardMarkup sendCarteditor_KB2(Long chatId, String name){
+    private InlineKeyboardMarkup sendCarteditor_KB2(Long chatId, String name, Long bot_id){
 
 
 
@@ -180,10 +178,10 @@ public class CommandDispatcher {
 
 
         List<CartItem> items = new ArrayList<>();
-        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).get();
+        CartItem prod =  cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).get();
         items.add(prod);
 
-        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, Long.valueOf(config.getBoit())).isPresent()){
+        if(!cartItemRepository.findByChatIdAndVapecomponyKatalog_NameAndBot_Id(chatId, name, bot_id).isPresent()){
             return null;
         }
 

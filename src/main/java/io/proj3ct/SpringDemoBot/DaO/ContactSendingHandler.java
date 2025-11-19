@@ -44,8 +44,7 @@ public class ContactSendingHandler {
     @Autowired
     private Adddelivery add_DELIVERY;
 
-    @Autowired
-    private BotConfig config;
+
     @Autowired
     private BotRepository botRepository;
     @Autowired
@@ -74,7 +73,7 @@ public class ContactSendingHandler {
         //InputMediaPhoto inputMedia = new InputMediaPhoto(fileId);
 
         media.put(chatId, update.getMessage().getContact());
-        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getCash_card().equals("CASH")) sendchoise_message2(chatId, "CASH", bot_id);
+        if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getCash_card().equals("CASH")) sendchoise_message2(chatId, "CASH", bot_id);
         else sendchoise_message2(chatId, "CARD", bot_id);
 
         return;
@@ -140,18 +139,18 @@ public class ContactSendingHandler {
 
         add_DELIVERY.put(chatId, true);
 
-        Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get();
+        Orders order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get();
         order.setCurrency("PLN");
         order.setCash_card(cur);
 
-        List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> cartItems = cartItemRepository.findByChatIdAndBot_Id(chatId, bot_id);
         System.out.println(order.getCreatedAt().toString());
         List<FinalItem> finalItems = cartItems.stream().map(cartItem -> {
             FinalItem finalItem = new FinalItem();
             finalItem.setName(cartItem.getVapecomponyKatalog().getName());
             finalItem.setCena(cartItem.getVapecomponyKatalog().getCena());
             finalItem.setQuantity(cartItem.getQuantity());
-            finalItem.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            finalItem.setBot(botRepository.findById(bot_id).get());
             finalItem.setOrder(order);
             finalItem.setVid(cartItem.getVapecomponyKatalog().getId());
             finalItem.setMenu(cartItem.getVapecomponyKatalog().getName());
@@ -159,7 +158,7 @@ public class ContactSendingHandler {
         }).collect(Collectors.toList());
 
         order.setFinalItems(finalItems);
-        order.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+        order.setBot(botRepository.findById(bot_id).get());
 
 
         orderRepository.save(order);

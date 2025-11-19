@@ -32,9 +32,6 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
     private CartItemRepository cartItemRepository;
 
     @Autowired
-    private BotConfig config;
-
-    @Autowired
     private ButtonText buttonText;
 
     @Autowired
@@ -59,12 +56,12 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
 
         messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
 
-        if(sendcart_nope(query.getMessage().getChatId())) return;
+        if(sendcart_nope(query.getMessage().getChatId(), bot_id)) return;
         sendCarteditor(query.getMessage().getChatId(), bot_id);
 
     }
 
-    private boolean sendcart_nope(Long chatId){
+    private boolean sendcart_nope(Long chatId, Long bot_id){
 /*
         if(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).isPresent()) {
 
@@ -76,7 +73,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
 
  */
 
-        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> or = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
         if(or.isPresent()) {
 
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
@@ -99,7 +96,7 @@ public class Cart_changeCallbackHandler implements CallbackHandler {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
 
-        List<CartItem> items = cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items = cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
 
             message.setText("\uD83D\uDED2 Ваша корзина пуста, \n" +

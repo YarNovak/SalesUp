@@ -38,8 +38,6 @@ public class DeliveryHandler {
     @Autowired
     private Media media;
 
-    @Autowired
-    BotConfig config;
 
     @Autowired
     private Adres adres;
@@ -67,7 +65,7 @@ public class DeliveryHandler {
     @Autowired
     private BotRepository botRepository;
 
-    public void handle_Delivery(Update update, AbsSender sender) throws TelegramApiException {
+    public void handle_Delivery(Update update, AbsSender sender, Long bot_id) throws TelegramApiException {
 
 
 
@@ -75,14 +73,14 @@ public class DeliveryHandler {
         Long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
 
-        Optional<Orders> order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit()));
+        Optional<Orders> order = orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id);
 
         String catalog = buttonText.getTexts().get("catalog");
         String cart = buttonText.getTexts().get("cart");
         String payment = buttonText.getTexts().get("payment");
 
 
-        if((!vapecomponyKatalogRepository.findByNameAndBot_Id(messageText, Long.valueOf(config.getBoit())).isEmpty()) ||(messageText.startsWith("/")) || (messageText.equals(catalog)) || (messageText.equals(cart)) || (messageText.equals(payment) ) && (!messageText.equals(botMessageRepository.findByMessageKeyAndBot_Id("delivery", Long.valueOf(config.getBoit())).get()))) {
+        if((!vapecomponyKatalogRepository.findByNameAndBot_Id(messageText, bot_id).isEmpty()) ||(messageText.startsWith("/")) || (messageText.equals(catalog)) || (messageText.equals(cart)) || (messageText.equals(payment) ) && (!messageText.equals(botMessageRepository.findByMessageKeyAndBot_Id("delivery", bot_id).get()))) {
 
             sendWhatever.sendhere_message(sender, chatId, "delivery",  null, null);
             return;
@@ -145,13 +143,13 @@ public class DeliveryHandler {
                 media.remove(chatId);
                 SendMessage photo = new SendMessage();
                 SendContact sendContact = new SendContact();
-                sendContact.setChatId(botRepository.findById(Long.valueOf(config.getBoit())).get().getOwner().getTelegramId().toString());
+                sendContact.setChatId(botRepository.findById(bot_id).get().getOwner().getTelegramId().toString());
                 sendContact.setFirstName(contact.getFirstName());
                 sendContact.setPhoneNumber(contact.getPhoneNumber());
 
                 SendMessage photo2 = new SendMessage();
 
-                photo.setChatId(botRepository.findById(Long.valueOf(config.getBoit())).get().getOwner().getTelegramId().toString());
+                photo.setChatId(botRepository.findById(bot_id).get().getOwner().getTelegramId().toString());
                 photo.setParseMode("MarkdownV2");
 
                 // photo.setPhoto(new InputFile(media_photo.getMedia()));
@@ -162,9 +160,9 @@ public class DeliveryHandler {
 
                 List<InlineKeyboardButton> row1 = new ArrayList<>();
                 InlineKeyboardButton editButton = new InlineKeyboardButton("Подтвердить!");
-                editButton.setCallbackData("ACCEPT" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId());
+                editButton.setCallbackData("ACCEPT" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId());
                 InlineKeyboardButton denybutton = new InlineKeyboardButton("Отлонить!");
-                denybutton.setCallbackData("DENY" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId());
+                denybutton.setCallbackData("DENY" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId());
 
                 row1.add(editButton);
                 row1.add(denybutton);
@@ -197,18 +195,18 @@ public class DeliveryHandler {
                     sendWhatever.sendhere_message(sender, chatId, "congrat",  null, null);
 
                     // Orders ord = orderRepository.findByUser_ChatIdAndPaidEquals(chatId, false).get();
-                    User us = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get();
+                    User us = userRepository.findByChatIdAndBot_Id(chatId, bot_id).get();
 
                     userRepository.save(us);
                     // sendText(config.getOwnerId(),  orderRepository.findByUser_ChatId(chatId).get().getUser().getUserName() + "замовив замовлення на суму "+ sendCarteditor_Total(chatId)+"zł за допомогою "+orderRepository.findByChatId(chatId).get().getCurrency()+ "карти");
 
                     // photo.setCaption(orderRepository.findByUser_ChatId(chatId).get().getUser().getUserName() + "замовив замовлення на суму "+ sendCarteditor_Total(chatId)+"zł за допомогою готівки" + "\n"+sendCarteditor_Total(chatId)+);
-                    photo.setText( escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId) +buttonText.getTexts().get("curr") + " наличкой\n\n")  + sendCarteditor_Text(chatId)+  escapeMarkdown( "\n\n"+"Адрес: "+adres.get(chatId)));
+                    photo.setText( escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId, bot_id) +buttonText.getTexts().get("curr") + " наличкой\n\n")  + sendCarteditor_Text(chatId, bot_id)+  escapeMarkdown( "\n\n"+"Адрес: "+adres.get(chatId)));
 
 
                     adres.remove(chatId);
 
-                    orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId(), chatId);
+                    orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId(), chatId);
                     sender.execute(photo);
                     sender.execute(sendContact);
 
@@ -232,12 +230,12 @@ public class DeliveryHandler {
 
     }
 
-    private double sendCarteditor_Total(Long chatId){
+    private double sendCarteditor_Total(Long chatId, Long bot_id){
 
 
         double total = 0.0;
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
 
             return total;
@@ -262,12 +260,12 @@ public class DeliveryHandler {
 
 
 
-    private String sendCarteditor_Text(Long chatId){
+    private String sendCarteditor_Text(Long chatId, Long bot_id){
 
 
 
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
             sb.append(escapeMarkdown(""));
             return sb.toString();
