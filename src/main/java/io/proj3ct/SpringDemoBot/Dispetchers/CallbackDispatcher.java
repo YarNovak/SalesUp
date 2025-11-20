@@ -132,7 +132,7 @@ public class CallbackDispatcher {
                     msg.setReplyMarkup(sendCarteditor_KB2(query.getMessage().getChatId(), message, bot_id));
 
                     AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-                    sendWhatever.sendhere_readyVapecomponyKatalogMessage(vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message, bot_id).get(), query.getMessage().getChatId(), sendCarteditor_Text2(query.getMessage().getChatId(), message, bot_id), "MarkdownV2", sender, sendCarteditor_KB2(query.getMessage().getChatId(), message, bot_id), null);
+                    sendWhatever.sendhere_readyVapecomponyKatalogMessage(bot_id, vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(message, bot_id).get(), query.getMessage().getChatId(), sendCarteditor_Text2(query.getMessage().getChatId(), message, bot_id), "MarkdownV2", sender, sendCarteditor_KB2(query.getMessage().getChatId(), message, bot_id), null);
                     //executeMessage(msg);
 
 

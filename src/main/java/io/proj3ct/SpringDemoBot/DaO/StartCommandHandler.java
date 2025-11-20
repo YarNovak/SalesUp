@@ -63,7 +63,7 @@ public class StartCommandHandler implements CommandHandler {
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
 
         messageRegistry.deleteMessagesAfter(message.getChatId(), message.getMessageId(), false, bot_id);
-        messageRegistry.deleteMessagesBefore(message.getChatId(), message.getMessageId(), false, sender);
+        messageRegistry.deleteMessagesBefore(bot_id, message.getChatId(), message.getMessageId(), false);
 
 
         System.out.println("holaaaaaaaaaaaaaaaaaaaaaaaaaaa");

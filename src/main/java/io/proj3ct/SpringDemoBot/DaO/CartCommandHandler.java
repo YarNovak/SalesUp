@@ -196,7 +196,7 @@ public class CartCommandHandler implements ButtonsMapHandler {
 
            Message m = sender.execute(message);
 
-            messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+            messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
         } catch (TelegramApiException e) {
 
         }

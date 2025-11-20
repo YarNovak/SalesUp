@@ -96,7 +96,7 @@ public class SendWhatever {
                 try{
 
                    Message m = sender.execute(sendPhoto);
-                   messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                   messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
 
                 }
                 catch(TelegramApiException e){
@@ -140,7 +140,7 @@ public class SendWhatever {
                 try{
 
                     Message m = sender.execute(sendVideo);
-                    messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                    messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
                 }
                 catch(TelegramApiException e){
                     e.printStackTrace();
@@ -179,7 +179,7 @@ public class SendWhatever {
 
                 try{
                    Message m = sender.execute(sendMessage);
-                    messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                    messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
                 }
                 catch(TelegramApiException e){
                     e.printStackTrace();
@@ -225,7 +225,7 @@ public class SendWhatever {
             try{
 
                 Message m = sender.execute(sendPhoto);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
 
             }
             catch(TelegramApiException e){
@@ -259,7 +259,7 @@ public class SendWhatever {
             try{
 
                Message m = sender.execute(sendVideo);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
                 e.printStackTrace();
@@ -287,7 +287,7 @@ public class SendWhatever {
 
             try{
                Message m = sender.execute(sendMessage);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
                 e.printStackTrace();
@@ -334,7 +334,7 @@ public class SendWhatever {
             try{
 
               Message m =  sender.execute(sendPhoto);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
 
             }
             catch(TelegramApiException e){
@@ -368,7 +368,7 @@ public class SendWhatever {
             try{
 
                Message m = sender.execute(sendVideo);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
                 e.printStackTrace();
@@ -396,7 +396,7 @@ public class SendWhatever {
 
             try{
                Message m = sender.execute(sendMessage);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
                 e.printStackTrace();
@@ -466,7 +466,7 @@ public class SendWhatever {
         }
     }
 
-    public void sendhere_readyVapecomponyKatalogMessage(Vapecompony_katalog vapecompony, Long chatId, String text, String parsemode,  AbsSender sender, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup){
+    public void sendhere_readyVapecomponyKatalogMessage(Long bot_id, Vapecompony_katalog vapecompony, Long chatId, String text, String parsemode,  AbsSender sender, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup){
 
 
 
@@ -502,7 +502,7 @@ public class SendWhatever {
             try{
 
                Message m = sender.execute(sendPhoto);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
 
             }
             catch(TelegramApiException e){
@@ -538,7 +538,7 @@ public class SendWhatever {
             try{
 
                Message m = sender.execute(sendVideo);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
                 e.printStackTrace();
@@ -567,7 +567,7 @@ public class SendWhatever {
 
             try{
                Message m = sender.execute(sendMessage);
-                messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+                messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
             }
             catch(TelegramApiException e){
                 e.printStackTrace();

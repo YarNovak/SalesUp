@@ -22,18 +22,17 @@ public class MessageRegistry {
     @Autowired
     TenantService tenantService;
 
-    private final Map<Long, Deque<Integer>> messagesToDelete = new ConcurrentHashMap<>();
+    private final Map<Long, Map<Long, Deque<Integer>> >messagesToDelete = new ConcurrentHashMap<>();
     private StartMessage startMessage;
     @Autowired
     private BotRepository botRepository;
 
-    public void addMessage(Long chatId, Integer messageId) {
-        /*
-        messagesToDelete
+    public void addMessage(Long bot_id, Long chatId, Integer messageId) {
+        messagesToDelete.get(bot_id)
                 .computeIfAbsent(chatId, k -> new ConcurrentLinkedDeque<>())
                 .addLast(messageId);
 
-         */
+
     }
 
 
@@ -42,9 +41,10 @@ public class MessageRegistry {
     }
 
 
-    public void deleteMessagesBefore(Long chatId, Integer targetMessageId, boolean inclusive, AbsSender bot) {
-        /*
-        Deque<Integer> deque = messagesToDelete.get(chatId);
+    public void deleteMessagesBefore(Long bot_id, Long chatId, Integer targetMessageId, boolean inclusive) {
+
+        AbsSender sender = tenantService.getSender(Objects.requireNonNull(botRepository.findById(bot_id).orElse(null)).getBotToken());
+        Deque<Integer> deque = messagesToDelete.get(bot_id).get(chatId);
         if (deque == null || deque.isEmpty()) return;
 
         // идём с начала очереди (самые старые сообщения)
@@ -58,7 +58,7 @@ public class MessageRegistry {
 
             if (shouldDelete) {
                 try {
-                    bot.execute(new DeleteMessage(chatId.toString(), messageId));
+                    sender.execute(new DeleteMessage(chatId.toString(), messageId));
                     System.out.println("✅ Видалено повідомлення: " + messageId);
                 } catch (Exception e) {
                     System.err.println("❌ Не вдалося видалити повідомлення " + messageId + ": " + e.getMessage());
@@ -74,15 +74,15 @@ public class MessageRegistry {
             messagesToDelete.remove(chatId);
         }
 
-         */
+
     }
 
 
 
     public void deleteMessagesAfter(Long chatId, Integer targetMessageId, boolean inclusive, Long bot_id) {
-        /*
 
-        Deque<Integer> deque = messagesToDelete.get(chatId);
+
+        Deque<Integer> deque = messagesToDelete.get(bot_id).get(chatId);
 
         AbsSender sender;
         sender = tenantService.getSender(Objects.requireNonNull(botRepository.findById(bot_id).orElse(null)).getBotToken());
@@ -109,9 +109,9 @@ public class MessageRegistry {
             messagesToDelete.remove(chatId);
         }
 
+/*
 
-
-        Deque<Integer> deque = messagesToDelete.get(chatId);
+        Deque<Integer> deque = messagesToDelete.get(bot_id).get(chatId);
         if (deque == null || deque.isEmpty()) {
            return;}
 
@@ -147,7 +147,7 @@ public class MessageRegistry {
         if (deque.isEmpty()) {
             messagesToDelete.remove(chatId);
         }
- */
+*/
 
     }
 

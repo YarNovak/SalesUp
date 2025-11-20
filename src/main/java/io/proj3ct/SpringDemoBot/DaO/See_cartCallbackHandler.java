@@ -184,17 +184,17 @@ public class See_cartCallbackHandler implements CallbackHandler {
 
 
             AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
-            executeMessage(message, sender);
+            executeMessage(message, sender, bot_id);
 
 
         }
 
 
     }
-    private void executeMessage(SendMessage message, AbsSender sender){
+    private void executeMessage(SendMessage message, AbsSender sender, Long bot_id){
         try {
             Message m =  sender.execute(message);
-            messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+            messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
         } catch (TelegramApiException e) {
 
         }

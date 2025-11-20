@@ -128,7 +128,7 @@ public class CommandDispatcher {
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         try{
             Message sm = sender.execute(fallback);
-            messageRegistry.addMessage(sm.getChatId(), sm.getMessageId());
+            messageRegistry.addMessage(bot_id, sm.getChatId(), sm.getMessageId());
         }
         catch(TelegramApiException e) {
             e.printStackTrace();

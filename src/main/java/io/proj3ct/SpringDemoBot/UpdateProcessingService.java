@@ -214,7 +214,7 @@ public class UpdateProcessingService {
 
         if(update.hasMessage()){
 
-            messageRegistry.addMessage(update.getMessage().getChatId(), update.getMessage().getMessageId());
+            messageRegistry.addMessage(bot.getId(), update.getMessage().getChatId(), update.getMessage().getMessageId());
 
         }
 

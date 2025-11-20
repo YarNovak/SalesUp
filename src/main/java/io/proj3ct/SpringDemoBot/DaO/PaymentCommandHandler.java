@@ -2,6 +2,7 @@ package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
 import io.proj3ct.SpringDemoBot.DB_entities.Bot;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.MessageRepo.MessageRegistry;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -45,18 +47,20 @@ public class PaymentCommandHandler implements ButtonsMapHandler {
     private ButtonText buttonText;
     @Autowired
     private MessageRegistry messageRegistry;
+    @Autowired
+    private TenantService tenantService;
 
     @Override
     public boolean support(String command, Long bot_id) {
         return buttonText.getTexts(bot_id).get("payment").equals(command);
     }
 
-    TelegramLongPollingBot bot;
 
     @Override
     public void handle(Message message, Long bot_id) {
 
-        messageRegistry.deleteMessagesBefore(message.getChatId(), message.getMessageId(), false, bot);
+        messageRegistry.deleteMessagesBefore(bot_id, message.getChatId(), message.getMessageId(), false);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
 
         System.out.println("fuck");
         Long chatId = message.getChatId();
@@ -86,7 +90,9 @@ public class PaymentCommandHandler implements ButtonsMapHandler {
 
             //    executeMessage(sendMessage);
 
-            sendWhatever.sendhere_message(bot_id,bot, chatId, "clearing",  markupInLine, null);
+
+
+            sendWhatever.sendhere_message(bot_id, sender,  chatId, "clearing",  markupInLine, null);
 
 
 
@@ -165,6 +171,8 @@ public class PaymentCommandHandler implements ButtonsMapHandler {
     }
     public void send_pay(long chatId, int messageId, Long bot_id){
 
+
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setParseMode("MarkdownV2");
@@ -202,8 +210,8 @@ public class PaymentCommandHandler implements ButtonsMapHandler {
 
 
         try {
-           Message m = bot.execute(message);
-           messageRegistry.addMessage(m.getChatId(), m.getMessageId());
+           Message m = sender.execute(message);
+           messageRegistry.addMessage(bot_id, m.getChatId(), m.getMessageId());
 
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);

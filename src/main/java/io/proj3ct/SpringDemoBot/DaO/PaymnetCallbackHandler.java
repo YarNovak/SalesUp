@@ -62,7 +62,7 @@ public class PaymnetCallbackHandler implements CallbackHandler {
         AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
 
         messageRegistry.deleteMessagesAfter(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, bot_id);
-        messageRegistry.deleteMessagesBefore(query.getMessage().getChatId(), query.getMessage().getMessageId(), false, sender);
+        messageRegistry.deleteMessagesBefore(bot_id, query.getMessage().getChatId(), query.getMessage().getMessageId(), false);
 
 
         System.out.println("fuck");

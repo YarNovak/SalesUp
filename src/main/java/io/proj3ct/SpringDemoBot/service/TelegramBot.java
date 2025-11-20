@@ -196,7 +196,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 //        if(update.hasMessage()){
 //
-//            messageRegistry.addMessage(update.getMessage().getChatId(), update.getMessage().getMessageId());
+//            messageRegistry.addMessage(bot_id, update.getMessage().getChatId(), update.getMessage().getMessageId());
 //
 //        }
 //
