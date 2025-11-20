@@ -4,9 +4,7 @@ import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import lombok.Getter;
 import lombok.Setter;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -14,41 +12,53 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class MessageRegistry {
 
     @Autowired
-    TenantService tenantService;
+    private TenantService tenantService;
 
-    private final Map<Long, Map<Long, Deque<Integer>> >messagesToDelete = new ConcurrentHashMap<>();
-    private StartMessage startMessage;
     @Autowired
     private BotRepository botRepository;
 
-    public void addMessage(Long bot_id, Long chatId, Integer messageId) {
-        messagesToDelete.get(bot_id)
+    /**
+     * messagesToDelete:
+     * botId -> (chatId -> queue of messageIds)
+     */
+    private final Map<Long, Map<Long, Deque<Integer>>> messagesToDelete = new ConcurrentHashMap<>();
+
+
+    // ============================================================
+    //                 ADD MESSAGE
+    // ============================================================
+
+    public void addMessage(Long botId, Long chatId, Integer messageId) {
+        messagesToDelete
+                .computeIfAbsent(botId, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(chatId, k -> new ConcurrentLinkedDeque<>())
                 .addLast(messageId);
-
-
     }
 
 
-    public void clearMessages(Long chatId) {
-      //  messagesToDelete.remove(chatId);
-    }
+    // ============================================================
+    //                 DELETE BEFORE
+    // ============================================================
 
+    public void deleteMessagesBefore(Long botId, Long chatId, Integer targetMessageId, boolean inclusive) {
 
-    public void deleteMessagesBefore(Long bot_id, Long chatId, Integer targetMessageId, boolean inclusive) {
+        Map<Long, Deque<Integer>> byBot = messagesToDelete.get(botId);
+        if (byBot == null) return;
 
-        AbsSender sender = tenantService.getSender(Objects.requireNonNull(botRepository.findById(bot_id).orElse(null)).getBotToken());
-        Deque<Integer> deque = messagesToDelete.get(bot_id).get(chatId);
+        Deque<Integer> deque = byBot.get(chatId);
         if (deque == null || deque.isEmpty()) return;
 
-        // идём с начала очереди (самые старые сообщения)
+        AbsSender sender = tenantService.getSender(
+                botRepository.findById(botId).orElseThrow().getBotToken()
+        );
+
         Iterator<Integer> it = deque.iterator();
+
         while (it.hasNext()) {
             Integer messageId = it.next();
 
@@ -65,30 +75,35 @@ public class MessageRegistry {
                 }
                 it.remove();
             } else {
-                // дальше идут более новые сообщения — их не трогаем
-                break;
+                break; // далі тільки новіші повідомлення
             }
         }
 
         if (deque.isEmpty()) {
-            messagesToDelete.remove(chatId);
+            byBot.remove(chatId);
         }
-
-
     }
 
 
+    // ============================================================
+    //                 DELETE AFTER
+    // ============================================================
 
-    public void deleteMessagesAfter(Long chatId, Integer targetMessageId, boolean inclusive, Long bot_id) {
+    public void deleteMessagesAfter(Long chatId, Integer targetMessageId, boolean inclusive, Long botId) {
 
+        Map<Long, Deque<Integer>> byBot = messagesToDelete.get(botId);
+        if (byBot == null) return;
 
-        Deque<Integer> deque = messagesToDelete.get(bot_id).get(chatId);
-
-        AbsSender sender;
-        sender = tenantService.getSender(Objects.requireNonNull(botRepository.findById(bot_id).orElse(null)).getBotToken());
+        Deque<Integer> deque = byBot.get(chatId);
         if (deque == null || deque.isEmpty()) return;
 
+        AbsSender sender = tenantService.getSender(
+                botRepository.findById(botId).orElseThrow().getBotToken()
+        );
+
+        // копія, бо видаляємо під час ітерації
         for (Integer messageId : List.copyOf(deque)) {
+
             boolean shouldDelete = inclusive
                     ? messageId >= targetMessageId
                     : messageId > targetMessageId;
@@ -99,89 +114,48 @@ public class MessageRegistry {
                     System.out.println("✅ Видалено повідомлення: " + messageId);
                 } catch (Exception e) {
                     System.err.println("❌ Не вдалося видалити повідомлення " + messageId + ": " + e.getMessage());
-                } finally {
-                    deque.remove(messageId);
                 }
+                deque.remove(messageId);
             }
         }
 
         if (deque.isEmpty()) {
-            messagesToDelete.remove(chatId);
+            byBot.remove(chatId);
         }
-
-/*
-
-        Deque<Integer> deque = messagesToDelete.get(bot_id).get(chatId);
-        if (deque == null || deque.isEmpty()) {
-           return;}
-
-        Iterator<Integer> it = deque.descendingIterator();
-
-        while (it.hasNext()) {
-            Integer messageId = it.next();
-
-            // якщо дійшли до цільового
-            if (messageId.equals(targetMessageId)) {
-                if (inclusive) {
-                    try {
-                        bot.execute(new DeleteMessage(chatId.toString(), messageId));
-                        System.out.println("✅ Видалено повідомлення: " + messageId);
-                    } catch (Exception e) {
-                        System.err.println("❌ Не вдалося видалити повідомлення " + messageId + ": " + e.getMessage());
-                    }
-                    it.remove();
-                }
-                break; // далі вже не видаляємо
-            }
-
-            // усі інші (після target) видаляємо
-            try {
-                bot.execute(new DeleteMessage(chatId.toString(), messageId));
-                System.out.println("✅ Видалено повідомлення: " + messageId);
-            } catch (Exception e) {
-                System.err.println("❌ Не вдалося видалити повідомлення " + messageId + ": " + e.getMessage());
-            }
-            it.remove();
-        }
-
-        if (deque.isEmpty()) {
-            messagesToDelete.remove(chatId);
-        }
-*/
-
     }
 
+
+    // ============================================================
+    //              START MESSAGE (якщо треба)
+    // ============================================================
 
     private final Map<Long, StartMessage> startMessages = new ConcurrentHashMap<>();
 
     public void registerStartMessage(Long chatId, Integer messageId) {
-        /*
         startMessages.compute(chatId, (id, old) -> {
             if (old == null) {
                 return new StartMessage(chatId, messageId);
             } else {
-                old.setMessageId(messageId); // оновлюємо messageId
+                old.setMessageId(messageId);
                 return old;
             }
         });
-         */
     }
 
     public StartMessage getStartMessage(Long chatId) {
-     //   return startMessages.get(chatId);
-        return null;
+        return startMessages.get(chatId);
     }
+
 
     @Setter
     @Getter
-    public  static class StartMessage{
+    public static class StartMessage {
+        private Long chatId;
+        private Integer messageId;
 
-        Long chatId;
-        Integer messageId;
         public StartMessage(Long chatId, Integer messageId) {
             this.chatId = chatId;
             this.messageId = messageId;
         }
     }
-
 }
