@@ -14,8 +14,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     @Autowired
     private final CartService cartService;
-    @Autowired
-    private BotConfig config;
+
 
 
     @Autowired
@@ -35,11 +34,11 @@ public class OrderService {
    }
 
    @Transactional
-    public void paid(long itId, Long chatId){
+    public void paid(long itId, Long chatId, Long bot_id){
 
-        Orders order = ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).orElse(null);
+        Orders order = ordersRepository.findByIdAndBot_Id(itId, bot_id).orElse(null);
         order.setPaid(true);
-        cartItemRepository.deleteByChatId(ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).get().getUser().getChatId().longValue());
+        cartItemRepository.deleteByChatId(ordersRepository.findByIdAndBot_Id(itId, bot_id).get().getUser().getChatId().longValue());
 
         System.out.println("(((");
         System.out.println(itId);
@@ -49,20 +48,20 @@ public class OrderService {
     }
 
     @Transactional
-    public void deny_paiment(long itId, Long chatId){
+    public void deny_paiment(long itId, Long chatId, Long bot_id){
 
-        Orders order = ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).orElse(null);
+        Orders order = ordersRepository.findByIdAndBot_Id(itId, bot_id).orElse(null);
      //   cartService.clearCart( ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).get().getUser().getChatId().longValue());
-        finalItemService.clearfinal_items(ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).get().getId());
+        finalItemService.clearfinal_items(ordersRepository.findByIdAndBot_Id(itId, bot_id).get().getId(), bot_id);
         ordersRepository.delete(order);
 
     }
     @Transactional
-    public void deny_order(long itId, Long chatId){
+    public void deny_order(long itId, Long chatId, Long bot_id){
 
-        Orders order = ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).orElse(null);
+        Orders order = ordersRepository.findByIdAndBot_Id(itId, bot_id).orElse(null);
         //   cartService.clearCart( ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).get().getUser().getChatId().longValue());
-        finalItemService.deletefromfinal_items(ordersRepository.findByIdAndBot_Id(itId, Long.valueOf(config.getBoit())).get().getId());
+        finalItemService.deletefromfinal_items(ordersRepository.findByIdAndBot_Id(itId, bot_id).get().getId(), bot_id);
         ordersRepository.delete(order);
 
     }

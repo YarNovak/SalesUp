@@ -206,7 +206,7 @@ public class DeliveryHandler {
 
                     adres.remove(chatId, bot_id);
 
-                    orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId(), chatId);
+                    orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId(), chatId, bot_id);
                     sender.execute(photo);
                     sender.execute(sendContact);
 

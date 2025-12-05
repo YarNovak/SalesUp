@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 
+import javax.swing.text.html.parser.Entity;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,10 @@ public class MessagesInf {
     }
 
    public Information getMy_messages(Long bot_id, String messageKey){
-
+        for ( Map.Entry<String, Information> entity : my_messages.get(bot_id).entrySet()) {
+            System.out.println(entity.getValue().getText() + " : " + entity.getKey());
+        }
+        System.out.println(my_messages.get(bot_id).toString());
         return my_messages.get(bot_id).get(messageKey);
 
    }
@@ -73,8 +77,8 @@ public class MessagesInf {
     }
 
     public String getMessageEntity(Long bot_id, String key){
-        return this.my_messages.get(bot_id).get(key).getText();
-        //return my_messages.get(key).getEntitiesJson();
+        return this.my_messages.get(bot_id).get(key).getEntitiesJson();
+
     }
 
 

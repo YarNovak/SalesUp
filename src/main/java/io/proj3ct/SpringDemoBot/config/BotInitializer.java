@@ -13,7 +13,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @Component
 public class BotInitializer {
-
+/*
     @Autowired
     TelegramBot bot;
 
@@ -28,4 +28,6 @@ public class BotInitializer {
         }
 
     }
+
+*/
 }

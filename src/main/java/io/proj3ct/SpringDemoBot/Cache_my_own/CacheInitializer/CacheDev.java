@@ -73,7 +73,7 @@ public class CacheDev {
                 ));
 
                 System.out.println(informationMap.get(botMessage.getMessageKey()).getText());
-                System.out.println("0000000000000000000000000");
+                System.out.println("000000000000000000000000011");
 
             }
 

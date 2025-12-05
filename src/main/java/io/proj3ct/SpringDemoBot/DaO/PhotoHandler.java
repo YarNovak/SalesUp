@@ -1,6 +1,7 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
 import io.proj3ct.SpringDemoBot.Cache_my_own.CachesForDB.ButtonText;
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.*;
@@ -29,9 +30,11 @@ import java.util.List;
 @Component
 public class PhotoHandler {
 
-    TelegramLongPollingBot bot;
+   // TelegramLongPollingBot bot;
+
     @Autowired
-    BotConfig config;
+    private TenantService tenantService;
+
     @Autowired
     Media media;
     @Autowired
@@ -65,7 +68,7 @@ public class PhotoHandler {
         Contact contact =  media.get(chatId, bot_id);
         media.remove(chatId, bot_id);
         SendContact sendContact = new SendContact();
-        sendContact.setChatId(botRepository.findById(Long.valueOf(config.getBoit())).get().getOwner().getTelegramId().toString());
+        sendContact.setChatId(botRepository.findById(bot_id).get().getOwner().getTelegramId().toString());
         sendContact.setFirstName(contact.getFirstName());
         sendContact.setPhoneNumber(contact.getPhoneNumber());
 
@@ -83,19 +86,19 @@ public class PhotoHandler {
         SendPhoto photo2 = new SendPhoto();
         photo2.setParseMode("MarkdownV2");
 
-        photo2.setChatId(botRepository.findById(Long.valueOf(config.getBoit())).get().getOwner().getTelegramId().toString());
+        photo2.setChatId(botRepository.findById(bot_id).get().getOwner().getTelegramId().toString());
 
         photo2.setPhoto(new InputFile(fileId));
-        photo2.setCaption(escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId) + buttonText.getTexts(bot_id).get("curr") + " с помощью онлайн метода оплаты\n\n") + sendCarteditor_Text(chatId, bot_id)+ escapeMarkdown("\n\n"+"Адрес: "+adres.get(chatId, bot_id)));
+        photo2.setCaption(escapeMarkdown(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getUser().getUserName() + " сделал заказ на суму " + sendCarteditor_Total(chatId, bot_id) + buttonText.getTexts(bot_id).get("curr") + " с помощью онлайн метода оплаты\n\n") + sendCarteditor_Text(chatId, bot_id)+ escapeMarkdown("\n\n"+"Адрес: "+adres.get(chatId, bot_id)));
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         InlineKeyboardButton editButton = new InlineKeyboardButton("Подтвердить!");
-        editButton.setCallbackData("ACCEPT" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId());
+        editButton.setCallbackData("ACCEPT" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId());
         InlineKeyboardButton denybutton = new InlineKeyboardButton("Отклонить!");
-        denybutton.setCallbackData("DENY" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId());
+        denybutton.setCallbackData("DENY" + "_" + orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId());
 
         row1.add(editButton);
         row1.add(denybutton);
@@ -107,7 +110,7 @@ public class PhotoHandler {
         photo2.setReplyMarkup(markup);
         adres.remove(chatId, bot_id);
 
-        orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, Long.valueOf(config.getBoit())).get().getId(), chatId);
+        orderService.paid(orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(chatId, false, bot_id).get().getId(), chatId, bot_id);
 
 
 
@@ -128,16 +131,17 @@ public class PhotoHandler {
 
              */
 
-            sendWhatever.sendhere_message(bot_id,bot, chatId, "congrat",  null, null);
+            AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+            sendWhatever.sendhere_message(bot_id,sender, chatId, "congrat",  null, null);
 
 
-            User us = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit())).get();
+            User us = userRepository.findByChatIdAndBot_Id(chatId, bot_id).get();
 
             userRepository.save(us);
 
 
-            bot.execute(photo2);
-            bot.execute(sendContact);
+            sender.execute(photo2);
+            sender.execute(sendContact);
 
         } catch (TelegramApiException e) {
             e.printStackTrace();
@@ -151,7 +155,7 @@ public class PhotoHandler {
 
 
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
             sb.append(escapeMarkdown(""));
             return sb.toString();
@@ -191,12 +195,12 @@ public class PhotoHandler {
      */
         return sb.toString();
     }
-    private double sendCarteditor_Total(Long chatId){
+    private double sendCarteditor_Total(Long chatId, Long bot_id){
 
 
         double total = 0.0;
         StringBuilder sb = new StringBuilder();
-        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartItemRepository.findByChatIdAndBot_IdOrderById(chatId, bot_id);
         if(items.isEmpty()){
 
             return total;
@@ -218,18 +222,7 @@ public class PhotoHandler {
 
         return total;
     }
-    private void sendText(Long chatId, String text){
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setText(text);
-        sendMessage.setChatId(chatId.toString());
-        try{
-            bot.execute(sendMessage);
-        }
-        catch (TelegramApiException e){
-            e.printStackTrace();
-        }
 
-    }
     private String escapeMarkdown(String text) {
         return text.replace("\\", "\\\\")  // Екрануємо зворотні слеші
                 .replace("_", "\\_")

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @RestController
-@RequestMapping("/api/webhook")
+@RequestMapping("/webhook")
 
 public class TelegramWebhookController {
 

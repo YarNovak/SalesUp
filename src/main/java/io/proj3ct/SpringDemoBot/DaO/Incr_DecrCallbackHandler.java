@@ -79,7 +79,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
         if (callbackData.startsWith("incr_")) {
             CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
             Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
-            cartService.addToCart(chatId, product.get());
+            cartService.addToCart(chatId, product.get(), bot_id);
 
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(String.valueOf(chatId));
@@ -104,7 +104,7 @@ public class Incr_DecrCallbackHandler implements CallbackHandler {
         } else if (callbackData.startsWith("decr_")) {
             CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
             Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
-            cartService.deleteFromCart(chatId, product.get());
+            cartService.deleteFromCart(chatId, product.get(), bot_id);
 
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(String.valueOf(chatId));

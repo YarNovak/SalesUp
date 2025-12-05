@@ -16,7 +16,7 @@ public class TelegramFileSender {
         sendDocument.setDocument(new InputFile(file));
 
         try {
-            sender.execute(sendDocument);
+          //  sender.execute(sendDocument);
         } catch (Exception e) {
             e.printStackTrace();
         }

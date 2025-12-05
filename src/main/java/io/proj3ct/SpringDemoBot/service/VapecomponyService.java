@@ -23,7 +23,7 @@ public class VapecomponyService {
     private final VapecomponyRepository repository;
     private final CacheInvalidationSender cacheInvalidationSender;
     private final BotRepository botRepository;
-    BotConfig botConfig;
+
 
     RabbitTemplate rabbitTemplate;
 
@@ -40,7 +40,7 @@ public class VapecomponyService {
     public Vapecompony save(VapecomponyDTO dto) {
 
         Vapecompony vapecompony = new Vapecompony(dto.getName(), dto.getMessageLink());
-        vapecompony.setBot(botRepository.findById(Long.valueOf(botConfig.getBoit())).get());
+      //  vapecompony.setBot(botRepository.findById(Long.valueOf(botConfig.getBoit())).get());
         Vapecompony saved = repository.save(vapecompony);
 
         cacheInvalidationSender.sendInvalidation("vapecomponyCache", String.valueOf(saved.getId()));

@@ -1,10 +1,12 @@
 package io.proj3ct.SpringDemoBot.DaO;
 
+import io.proj3ct.SpringDemoBot.TenantService;
 import io.proj3ct.SpringDemoBot.config.BotConfig;
 import io.proj3ct.SpringDemoBot.dopclasses.Senders.SendWhatever;
 import io.proj3ct.SpringDemoBot.model.OrderService;
 import io.proj3ct.SpringDemoBot.model.Orders;
 import io.proj3ct.SpringDemoBot.model.OrdersRepository;
+import io.proj3ct.SpringDemoBot.repository.BotRepository;
 import io.proj3ct.SpringDemoBot.service.Send;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -26,7 +29,11 @@ public class DenyCallbackHandler implements CallbackHandler {
 
     TelegramLongPollingBot bot;
 
+    @Autowired
+    private TenantService tenantService;
 
+    @Autowired
+    private BotRepository botRepository;
 
     @Override
     public boolean support(String callbackData) {
@@ -87,12 +94,13 @@ public class DenyCallbackHandler implements CallbackHandler {
                 "@mrBaffik⁉\uFE0F\n" +
                 "\n" +
                 "Вскоре мы исправим это недорозумение\uD83E\uDD7A");
-        orderService.deny_paiment(itemtId,  order.getUser().getChatId());
-        sendWhatever.sendhere_message(bot_id,bot,  order.getUser().getChatId(), "deny",  null, null);
+        orderService.deny_paiment(itemtId,  order.getUser().getChatId(), bot_id);
+        AbsSender sender = tenantService.getSender(botRepository.findById(bot_id).orElse(null).getBotToken());
+        sendWhatever.sendhere_message(bot_id,sender ,  order.getUser().getChatId(), "deny",  null, null);
         try {
             //  execute(sendMessage);
            // bot.execute(photo);
-            bot.execute(editMarkup);
+            sender.execute(editMarkup);
 
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);

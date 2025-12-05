@@ -79,7 +79,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
 
 
             Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
-            cartService.addToCart(chatId, product.get());
+            cartService.addToCart(chatId, product.get(), bot_id);
 
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(String.valueOf(chatId));
@@ -114,7 +114,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
             System.out.println(4);
             CartItem cti = cartItemRepository.findByIdAndBot_Id(itemtId, bot_id).get();
             Optional<Vapecompony_katalog> product = vapecomponyKatalogRepository.findByIdAndBot_Id(cti.getVapecomponyKatalog().getId(), bot_id);
-            cartService.deleteFromCart(chatId, product.get());
+            cartService.deleteFromCart(chatId, product.get(), bot_id);
 
             EditMessageText editMessage = new EditMessageText();
             editMessage.setChatId(String.valueOf(chatId));
@@ -172,7 +172,7 @@ public class Incr_Decr2CallbackHandler implements CallbackHandler {
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
             //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
-            orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
+            orderService.deny_order(or.get().getId(), or.get().getUser().getChatId(), bot_id);
         }
         //  return true;
         return  false;

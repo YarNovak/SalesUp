@@ -301,7 +301,7 @@ public class UpdateProcessingService {
 
             for(User user: userRepository.findByLastUpdatedBeforeAndBot_Id(nowMinusMin, bot.getId())){
                 if((user.getLastUpdated().before(nowMinusMin)) && (orderRepository.findByUser_ChatIdAndPaidEqualsAndBot_Id(user.getChatId(), false, bot.getId()).isEmpty())){
-                    cartService.clearCart(user.getChatId());
+                    cartService.clearCart(user.getChatId(), bot.getId());
 
                 }
                 add_DELIVERY.remove(user.getChatId(), bot.getId());
@@ -344,7 +344,7 @@ public class UpdateProcessingService {
 
             if(order.getDelivery() == null){
 
-                orderService.deny_paiment(order.getId(), order.getUser().getChatId());
+                orderService.deny_paiment(order.getId(), order.getUser().getChatId(), bot.getId());
                 add_DELIVERY.remove(user.getChatId(), bot.getId());
                 wait_photo.remove(user.getChatId(), bot.getId());
                 sent.remove(user.getChatId(), bot.getId());
@@ -355,7 +355,7 @@ public class UpdateProcessingService {
 
             else if(wait_photo.getOrDefault(user.getChatId(), false, bot.getId())){
 
-                orderService.deny_paiment(order.getId(), order.getUser().getChatId());
+                orderService.deny_paiment(order.getId(), order.getUser().getChatId(), bot.getId());
                 add_DELIVERY.remove(user.getChatId(), bot.getId());
                 wait_photo.remove(user.getChatId(), bot.getId());
                 sent.remove(user.getChatId(), bot.getId());

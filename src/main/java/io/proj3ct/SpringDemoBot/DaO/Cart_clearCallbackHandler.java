@@ -63,7 +63,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
 
         if(sendcart_nope(chatId, bot_id)) return;
 /////////////////////////////////////////////////////////////////////////
-        cartService.clearCart(chatId);
+        cartService.clearCart(chatId, bot_id);
         EditMessageText editMessage = new EditMessageText();
         editMessage.setChatId(String.valueOf(chatId));
         editMessage.setParseMode("HTML");
@@ -124,7 +124,7 @@ public class Cart_clearCallbackHandler implements CallbackHandler {
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
             //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
-            orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
+            orderService.deny_order(or.get().getId(), or.get().getUser().getChatId(), bot_id);
         }
         //  return true;
         return  false;

@@ -23,8 +23,7 @@ public class CartService {
     @Autowired
     private BotRepository botRepository;
 
-    @Autowired
-    BotConfig config;
+
 
 
     public CartService(CartItemRepository cartRepo, VapecomponyKatalogRepository vapecomponyKatalogRepository, UserRepository userRepository) {
@@ -35,11 +34,11 @@ public class CartService {
 
 
 
-    public void addToCart(Long chatId, Vapecompony_katalog product) {
-        var existing = cartRepo.findByChatIdAndVapecomponyKatalog_IdAndBot_Id(chatId, product.getId(), Long.valueOf(config.getBoit()));
-        var se_user = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+    public void addToCart(Long chatId, Vapecompony_katalog product, Long bot_id) {
+        var existing = cartRepo.findByChatIdAndVapecomponyKatalog_IdAndBot_Id(chatId, product.getId(), bot_id);
+        var se_user = userRepository.findByChatIdAndBot_Id(chatId, bot_id);
 
-        var existings = vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(product.getName(), Long.valueOf(config.getBoit()));
+        var existings = vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(product.getName(), bot_id);
         Vapecompony_katalog items = existings.get();
 
         if(items.getKilkist() <= 0) return;
@@ -48,9 +47,9 @@ public class CartService {
           //  deleteoneitem(chatId, product);
             CartItem item = existing.get();
             item.setQuantity(item.getQuantity() + 1);
-            item.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            item.setBot(botRepository.findById(bot_id).get());
             cartRepo.save(item);
-            deleteoneitem(chatId, product);
+            deleteoneitem(chatId, product, bot_id);
             User user = se_user.get();
 
 
@@ -60,16 +59,16 @@ public class CartService {
 
             CartItem item = new CartItem();
             item.setChatId(chatId);
-            item.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            item.setBot(botRepository.findById(bot_id).get());
             item.setVapecomponyKatalog(product);
             cartRepo.save(item);
-            deleteoneitem(chatId, product);
+            deleteoneitem(chatId, product, bot_id);
         }
     }
-    public void deleteFromCart(Long chatId, Vapecompony_katalog product){
+    public void deleteFromCart(Long chatId, Vapecompony_katalog product, Long bot_id){
 
-        var existing = cartRepo.findByChatIdAndVapecomponyKatalog_IdAndBot_Id(chatId, product.getId(), Long.valueOf(config.getBoit()));
-        var se_user = userRepository.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+        var existing = cartRepo.findByChatIdAndVapecomponyKatalog_IdAndBot_Id(chatId, product.getId(), bot_id);
+        var se_user = userRepository.findByChatIdAndBot_Id(chatId, bot_id);
 
        // var existings = vapecomponyKatalogRepository.findVapecompony_katalogByName(product.getName());
        // Vapecompony_katalog items = existings.get();
@@ -82,7 +81,7 @@ public class CartService {
             item.setQuantity(item.getQuantity() - 1);
             if(item.getQuantity() <=0) cartRepo.delete(item);
             else  cartRepo.save(item);
-            addoneitem(chatId, product);
+            addoneitem(chatId, product, bot_id);
             User user = se_user.get();
 
 
@@ -91,19 +90,12 @@ public class CartService {
         } else {
             CartItem item = new CartItem();
             item.setChatId(chatId);
-            item.setBot(botRepository.findById(Long.valueOf(config.getBoit())).get());
+            item.setBot(botRepository.findById(bot_id).get());
             item.setVapecomponyKatalog(product);
             cartRepo.save(item);
-            addoneitem(chatId, product);
+            addoneitem(chatId, product, bot_id);
         }
 
-    }
-
-
-
-
-    public List<CartItem> getCart(Long chatId) {
-        return cartRepo.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
     }
 
 
@@ -113,9 +105,9 @@ public class CartService {
 
 
     @Transactional
-    public void deleteoneitem(Long chatId, Vapecompony_katalog product) {
+    public void deleteoneitem(Long chatId, Vapecompony_katalog product, Long bot_id) {
 
-        var existing = vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(product.getName(), Long.valueOf(config.getBoit()));
+        var existing = vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(product.getName(), bot_id);
         if (existing.isPresent()) {
             Vapecompony_katalog item = existing.get();
             item.setKilkist(item.getKilkist() - 1);
@@ -127,9 +119,9 @@ public class CartService {
     }
 
     @Transactional
-    public void addoneitem(Long chatId, Vapecompony_katalog product) {
+    public void addoneitem(Long chatId, Vapecompony_katalog product, Long bot_id) {
 
-        var existing = vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(product.getName(), Long.valueOf(config.getBoit()));
+        var existing = vapecomponyKatalogRepository.findVapecompony_katalogByNameAndBot_Id(product.getName(), bot_id);
         if (existing.isPresent()) {
             Vapecompony_katalog item = existing.get();
             item.setKilkist(item.getKilkist() + 1);
@@ -143,10 +135,10 @@ public class CartService {
 
 
     @Transactional
-    public void clearCart(Long chatId) {
+    public void clearCart(Long chatId, Long bot_id) {
 
 
-        List<CartItem> items =cartRepo.findByChatIdAndBot_Id(chatId, Long.valueOf(config.getBoit()));
+        List<CartItem> items =cartRepo.findByChatIdAndBot_Id(chatId, bot_id);
         for(CartItem item : items) {
             Vapecompony_katalog product = item.getVapecomponyKatalog();
             product.setKilkist(product.getKilkist() + item.getQuantity());

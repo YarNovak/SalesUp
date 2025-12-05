@@ -159,7 +159,7 @@ public class CallbackDispatcher {
                     //msg.setReplyMarkup(generateProductButtons(l));
                     System.out.println("kakashki)");
 
-                    sendWhatever.sendhere_firstAdd(bot_id, query.getMessage().getChatId(), product.getId(), generateProductButtons(l, bot_id), null );
+                    sendWhatever.sendhere_firstAdd(query.getMessage().getChatId(), product.getId(), bot_id, generateProductButtons(l, bot_id), null );
 
                 }
 

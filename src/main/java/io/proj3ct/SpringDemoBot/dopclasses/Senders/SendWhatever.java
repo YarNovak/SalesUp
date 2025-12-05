@@ -57,8 +57,8 @@ public class SendWhatever {
     public void sendhere_message(Long bot_id, AbsSender sender, Long chatId, String key, InlineKeyboardMarkup markupInLine, ReplyKeyboardMarkup replyKeyboardMarkup) {
 
             String type = "text";
-
-            
+            System.out.println("MESSAGE WHATEVER: " + bot_id + " : " + key);
+            System.out.println(messagesinf.getMy_messages(bot_id, key));
             if(messagesinf.getMy_messages(bot_id, key).getPhoto()!=null) {type = "photo";}
             else if(messagesinf.getMy_messages(bot_id, key).getVideo()!=null) {type = "video";}
 

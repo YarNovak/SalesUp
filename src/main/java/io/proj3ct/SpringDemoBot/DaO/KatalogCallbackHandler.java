@@ -131,7 +131,7 @@ public class KatalogCallbackHandler implements CallbackHandler {
             //SendMessage sendMessage = new SendMessage(chatId.toString(), "Ваш заказ в обработке, дождитесь подтверждения\uD83D\uDE0A");
             //  sendWhatever.sendhere_message(bot_id,bot, chatId, "please_whait", null, null);
             // return true;
-            orderService.deny_order(or.get().getId(), or.get().getUser().getChatId());
+            orderService.deny_order(or.get().getId(), or.get().getUser().getChatId(), bot_id);
         }
         //  return true;
         return  false;
